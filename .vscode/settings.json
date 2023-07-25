@@ -1,0 +1,12 @@
+{
+  "[rust]": {
+    "editor.tabSize": 4
+  },
+  "[csharp]": {
+    "editor.tabSize": 4
+  },
+  "rust-analyzer.linkedProjects": [
+    "src/Shimakaze.UI.Native/Cargo.toml"
+  ],
+  "dotnet.defaultSolution": "Shimakaze.UI.sln",
+}

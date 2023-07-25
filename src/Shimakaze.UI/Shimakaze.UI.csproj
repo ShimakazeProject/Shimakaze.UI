@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <!-- 定义一个 Target，名为 BuildRustProject -->
+  <Target Name="BuildRustProject" BeforeTargets="CoreCompile">
+    <!-- 定义一个 Property，表示 Rust 项目的相对路径 -->
+    <PropertyGroup>
+      <RustProjectPath>$(MSBuildThisFileDirectory)..\Shimakaze.UI.Native</RustProjectPath>
+    </PropertyGroup>
+    <!-- 根据 Configuration 的不同，使用不同的 cargo 命令编译 Rust 项目 -->
+    <Exec Command="cargo build --release" WorkingDirectory="$(RustProjectPath)" Condition="'$(Configuration)' == 'Release'" />
+    <Exec Command="cargo build" WorkingDirectory="$(RustProjectPath)" Condition="'$(Configuration)' == 'Debug'" />
+    <!-- 根据 Configuration 的不同，使用不同的 Rust 项目的输出路径 -->
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+      <RustOutputPath>$(RustProjectPath)\target\release</RustOutputPath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+      <RustOutputPath>$(RustProjectPath)\target\debug</RustOutputPath>
+    </PropertyGroup>
+    <!-- 根据平台的不同，定义一个 Item，表示 Rust 项目的输出文件 -->
+    <!-- 如果平台是 Windows，就复制 dll 和 pdb 文件 -->
+    <ItemGroup Condition="$([MSBuild]::IsOsPlatform('Windows'))">
+      <RustOutput Include="$(RustOutputPath)\*.dll" />
+      <RustOutput Include="$(RustOutputPath)\*.pdb" />
+    </ItemGroup>
+    <!-- 如果平台是 Linux，就复制 so 和 debug 文件 -->
+    <ItemGroup Condition="$([MSBuild]::IsOsPlatform('Linux'))">
+      <RustOutput Include="$(RustOutputPath)\*.so" />
+      <RustOutput Include="$(RustOutputPath)\*.debug" />
+    </ItemGroup>
+    <!-- 如果平台是 MacOS，就复制 dylib 和 dSYM 文件 -->
+    <ItemGroup Condition="$([MSBuild]::IsOsPlatform('OSX'))">
+      <RustOutput Include="$(RustOutputPath)\*.dylib" />
+      <RustOutput Include="$(RustOutputPath)\*.dSYM" />
+    </ItemGroup>
+
+    <!-- 调用 Copy Task，将 Rust 项目的输出文件复制到 C# 项目的输出文件夹 -->
+    <Copy SourceFiles="@(RustOutput)" DestinationFolder="$(OutDir)" />
+  </Target>
+
+</Project>

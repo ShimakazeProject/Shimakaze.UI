@@ -8,6 +8,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Mime-Detective" Version="23.6.1" />
+  </ItemGroup>
+
   <!-- 定义一个 Target，名为 BuildRustProject -->
   <Target Name="BuildRustProject" BeforeTargets="CoreCompile">
     <!-- 定义一个 Property，表示 Rust 项目的相对路径 -->

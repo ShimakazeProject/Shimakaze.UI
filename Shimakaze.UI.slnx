@@ -9,4 +9,5 @@
     <File Path="LICENSE" />
     <File Path="nuget.config" />
   </Folder>
+  <Project Path="src/Shimakaze.UI.Core/Shimakaze.UI.Core.csproj" />
 </Solution>

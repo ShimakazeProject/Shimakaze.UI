@@ -5,5 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
+    <PackageVersion Include="Silk.NET.Windowing.Common" Version="2.23.0" />
+    <PackageVersion Include="Silk.NET.Windowing.Glfw" Version="2.23.0" />
   </ItemGroup>
 </Project>

@@ -1,8 +1,10 @@
 ﻿using Shimakaze.UI.Core;
 
+#pragma warning disable IDE0130 // 命名空间与文件夹结构不匹配
 namespace Microsoft.Extensions.Hosting;
+#pragma warning restore IDE0130 // 命名空间与文件夹结构不匹配
 
-public static class ShimakazeUIApplicationBuilderExtensions
+public static class HostingExtensions
 {
     extension(Host)
     {

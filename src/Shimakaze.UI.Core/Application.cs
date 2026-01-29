@@ -5,17 +5,35 @@ using Shimakaze.UI.Core.Dispatchers;
 
 namespace Shimakaze.UI.Core;
 
-public sealed class Application(
-    Dispatcher dispatcher,
-    IServiceProvider serviceProvider,
-    ILogger<Application> logger) : IHost
+public sealed class Application : IHost
 {
     private bool _disposedValue;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    public Dispatcher Dispatcher { get; } = dispatcher;
-    public IServiceProvider Services { get; } = serviceProvider;
-    public ILogger Logger { get; } = logger;
+    public static Application Instance { get; private set; } = default!;
+
+    public WindowManager WindowManager { get; }
+    public Dispatcher Dispatcher { get; }
+    public IServiceProvider Services { get; }
+    public ILogger Logger { get; }
+
+    public Application(
+        IServiceProvider serviceProvider,
+        Dispatcher dispatcher,
+        WindowManager windowManager,
+        ILogger<Application> logger)
+    {
+        if (Instance is not null)
+            throw new InvalidOperationException("Application is already initialized.");
+
+        Instance = this;
+
+        WindowManager = windowManager;
+        Dispatcher = dispatcher;
+        Services = serviceProvider;
+        Logger = logger;
+    }
+
 
     public Task StartAsync(CancellationToken cancellationToken = default)
     {

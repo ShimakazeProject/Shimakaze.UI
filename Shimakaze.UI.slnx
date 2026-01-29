@@ -10,4 +10,5 @@
     <File Path="nuget.config" />
   </Folder>
   <Project Path="src/Shimakaze.UI.Core/Shimakaze.UI.Core.csproj" />
+  <Project Path="src/Shimakaze.UI.Glfw/Shimakaze.UI.Glfw.csproj" />
 </Solution>

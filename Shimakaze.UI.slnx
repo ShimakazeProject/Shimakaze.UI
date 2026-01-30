@@ -11,4 +11,6 @@
   </Folder>
   <Project Path="src/Shimakaze.UI.Core/Shimakaze.UI.Core.csproj" />
   <Project Path="src/Shimakaze.UI.Glfw/Shimakaze.UI.Glfw.csproj" />
+  <Project Path="src/Shimakaze.UI.Rendering.OpenGL/Shimakaze.UI.Rendering.OpenGL.csproj" />
+  <Project Path="src/Shimakaze.UI.Rendering/Shimakaze.UI.Rendering.csproj" />
 </Solution>

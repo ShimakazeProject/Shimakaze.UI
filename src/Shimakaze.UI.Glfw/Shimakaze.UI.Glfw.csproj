@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Shimakaze.UI.Core\Shimakaze.UI.Core.csproj" />
+    <ProjectReference Include="..\Shimakaze.UI.Input\Shimakaze.UI.Input.csproj" />
   </ItemGroup>
 
 </Project>

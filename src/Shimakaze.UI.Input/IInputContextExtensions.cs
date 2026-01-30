@@ -1,6 +1,6 @@
 using Silk.NET.Input;
 
-namespace Shimakaze.UI.Core.Input;
+namespace Shimakaze.UI.Input;
 
 internal static class IInputContextExtensions
 {

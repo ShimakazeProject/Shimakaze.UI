@@ -3,12 +3,17 @@ using Microsoft.Extensions.Logging;
 
 using Shimakaze.UI.Core.Dispatchers;
 
+using Silk.NET.Windowing;
+
 namespace Shimakaze.UI.Core;
 
 public sealed class Application : IHost
 {
     private bool _disposedValue;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+    private readonly IWindowOptionsProvider _windowOptionsProvider;
+    private readonly IWindowProvider _windowProvider;
 
     public static Application Instance { get; private set; } = default!;
 
@@ -21,7 +26,9 @@ public sealed class Application : IHost
         IServiceProvider serviceProvider,
         Dispatcher dispatcher,
         WindowManager windowManager,
-        ILogger<Application> logger)
+        ILogger<Application> logger,
+        IWindowOptionsProvider windowOptionsProvider,
+        IWindowProvider windowProvider)
     {
         if (Instance is not null)
             throw new InvalidOperationException("Application is already initialized.");
@@ -32,7 +39,14 @@ public sealed class Application : IHost
         Dispatcher = dispatcher;
         Services = serviceProvider;
         Logger = logger;
+        _windowOptionsProvider = windowOptionsProvider;
+        _windowProvider = windowProvider;
     }
+
+
+    internal IWindow CreateNativeWindow()
+        => _windowProvider.CreateWindow(
+            _windowOptionsProvider.CreateOptions());
 
 
     public Task StartAsync(CancellationToken cancellationToken = default)

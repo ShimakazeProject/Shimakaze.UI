@@ -2,7 +2,7 @@ using Silk.NET.Input;
 using Silk.NET.Windowing;
 
 
-namespace Shimakaze.UI.Core;
+namespace Shimakaze.UI.Input;
 
 public interface IInputContextProvider
 {

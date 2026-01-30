@@ -1,4 +1,5 @@
 ﻿using Shimakaze.UI.Core;
+using Shimakaze.UI.Input;
 
 using Silk.NET.Input;
 using Silk.NET.Input.Glfw;

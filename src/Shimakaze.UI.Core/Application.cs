@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Shimakaze.UI.Core.Dispatchers;
@@ -14,6 +14,7 @@ public sealed class Application : IHost
 
     private readonly IWindowOptionsProvider _windowOptionsProvider;
     private readonly IWindowProvider _windowProvider;
+    private readonly IHostApplicationLifetime _lifetime;
 
     public static Application Instance { get; private set; } = default!;
 
@@ -28,7 +29,8 @@ public sealed class Application : IHost
         WindowManager windowManager,
         ILogger<Application> logger,
         IWindowOptionsProvider windowOptionsProvider,
-        IWindowProvider windowProvider)
+        IWindowProvider windowProvider,
+        IHostApplicationLifetime lifetime)
     {
         if (Instance is not null)
             throw new InvalidOperationException("Application is already initialized.");
@@ -41,6 +43,7 @@ public sealed class Application : IHost
         Logger = logger;
         _windowOptionsProvider = windowOptionsProvider;
         _windowProvider = windowProvider;
+        _lifetime = lifetime;
     }
 
 
@@ -48,11 +51,35 @@ public sealed class Application : IHost
         => _windowProvider.CreateWindow(
             _windowOptionsProvider.CreateOptions());
 
+    private void MainLoop()
+    {
+        // 初始化 Windowing 运行时（如 GLFW）
+        WindowManager.Initialize();
+
+        while (!_lifetime.ApplicationStopping.IsCancellationRequested)
+        {
+            if (Dispatcher.Dequeue(out var task))
+                task.Invoke();
+
+            // 如果没有窗口且允许自动退出，则退出
+            if (WindowManager.IsEmpty)
+                break;
+
+            // 2. 处理窗口事件和渲染
+            WindowManager.Update();
+
+            Thread.Yield();
+        }
+
+        Shutdown();
+    }
+
+    public void Shutdown() => _lifetime.StopApplication();
 
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.Register(_cancellationTokenSource.Cancel);
-        Dispatcher.Start(_cancellationTokenSource.Token);
+        Dispatcher.Start(MainLoop);
         return Task.CompletedTask;
     }
 

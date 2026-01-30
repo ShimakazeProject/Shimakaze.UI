@@ -1,16 +1,30 @@
-namespace Shimakaze.UI.Core;
+﻿namespace Shimakaze.UI.Core;
 
 public sealed class WindowManager
 {
     private readonly LinkedList<INativeWindow> _windows = [];
+    private readonly Lock _lock = new();
 
     private bool _initialized = false;
+
+    public bool IsEmpty => _windows.Count == 0;
 
     internal void Register(Window window)
     {
         INativeWindow nativeWindow = window;
-        var node = _windows.AddLast(window);
-        window.Closed += (_, _) => _windows.Remove(node);
+        LinkedListNode<INativeWindow> node;
+        lock (_lock)
+        {
+            node = _windows.AddLast(window);
+        }
+
+        window.Closed += (_, _) =>
+        {
+            lock (_lock)
+            {
+                _windows.Remove(node);
+            }
+        };
 
         if (_initialized)
             nativeWindow.Native.Initialize();
@@ -22,9 +36,23 @@ public sealed class WindowManager
             throw new InvalidOperationException("WindowManager is already initialized.");
 
         _initialized = true;
-        foreach (var window in _windows)
+        lock (_lock)
         {
-            window.Native.Initialize();
+            foreach (var window in _windows)
+                window.Native.Initialize();
+        }
+    }
+
+    internal void Update()
+    {
+        lock (_lock)
+        {
+            foreach (var window in _windows)
+            {
+                window.Native.DoEvents();
+                window.Native.DoUpdate();
+                window.Native.DoRender();
+            }
         }
     }
 }

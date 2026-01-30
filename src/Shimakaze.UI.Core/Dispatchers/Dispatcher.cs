@@ -1,4 +1,5 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Channels;
 
 namespace Shimakaze.UI.Core.Dispatchers;
@@ -28,19 +29,13 @@ public sealed class Dispatcher
 
     private void UIThreadRun(object? state)
     {
-        CancellationToken cancellationToken = state is null
-            ? CancellationToken.None
-            : (CancellationToken)state;
-
+        ArgumentNullException.ThrowIfNull(state);
         DispatcherSynchronizationContext context = new(this);
         SynchronizationContext.SetSynchronizationContext(context);
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            // TODO: 处理事件循环
-        }
+        ((Action)state)();
     }
 
-    internal void Start(CancellationToken cancellationToken) => _thread.Start(cancellationToken);
+    internal void Start(Action action) => _thread.Start(action);
 
     internal bool Wait(TimeSpan timeout) => _thread.Join(timeout);
 
@@ -60,6 +55,9 @@ public sealed class Dispatcher
         var result = _tasks.Writer.TryWrite(task);
         Debug.Assert(result);
     }
+
+    internal bool Dequeue([NotNullWhen(true)] out IDispatcherTask? task)
+        => _tasks.Reader.TryRead(out task);
 
     /// <summary>
     /// 在 UI 线程上执行操作

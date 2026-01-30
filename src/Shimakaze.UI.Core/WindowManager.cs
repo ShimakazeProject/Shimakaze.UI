@@ -10,7 +10,7 @@ public sealed class WindowManager
     {
         INativeWindow nativeWindow = window;
         var node = _windows.AddLast(window);
-        window.Closing += (_, _) => _windows.Remove(node);
+        window.Closed += (_, _) => _windows.Remove(node);
 
         if (_initialized)
             nativeWindow.Native.Initialize();

@@ -23,6 +23,7 @@ public partial class Window : INativeWindow
     public event UIEventHandler<Window, WindowUpdateEventArgs>? Update;
     public event UIEventHandler<Window, WindowUpdateEventArgs>? Render;
     public event UIEventHandler<Window, CancelEventArgs>? Closing;
+    public event UIEventHandler<Window>? Closed;
 
     public event UIEventHandler<Window, FileDropEventArgs>? FileDrop;
 
@@ -90,6 +91,9 @@ public partial class Window : INativeWindow
         Closing?.Invoke(this, cancelEventArgs);
         if (cancelEventArgs.Cancel)
             _native.IsClosing = false;
+
+        if (_native.IsClosing)
+            Closed?.Invoke(this, EventArgs.Empty);
     }
 
     protected virtual void OnFileDrop(string[] paths)

@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Silk.NET.Input.Glfw" />
     <PackageReference Include="Silk.NET.Windowing.Glfw" />
   </ItemGroup>
 

@@ -7,11 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Shimakaze.UI.Rendering" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Silk.NET.Input.Common" />
     <PackageReference Include="Silk.NET.Windowing.Common" />
   </ItemGroup>
 

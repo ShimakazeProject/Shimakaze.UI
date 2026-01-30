@@ -1,30 +1,29 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
+using Silk.NET.Input;
+using Silk.NET.Windowing;
 
 namespace Shimakaze.UI.Core;
 
 public sealed class WindowManager(
     IServiceProvider serviceProvider,
     IWindowOptionsProvider windowOptionsProvider,
-    IWindowProvider windowProvider)
+    IWindowProvider windowProvider,
+    IInputContextProvider inputContextProvider)
 {
     public TWindow CreateWindow<TWindow>()
         where TWindow : Window
     {
         var window = ActivatorUtilities.CreateInstance<TWindow>(serviceProvider);
 
-        ApplyWindow(window);
-
         return window;
     }
 
-    internal void ApplyWindow(Window window)
-    {
-        var options = windowOptionsProvider.CreateOptions();
+    internal IInputContext CreateInputContext(IWindow native)
+        => inputContextProvider.CreateInputContext(native);
 
-        var native = windowProvider.CreateWindow(options);
-
-        window.Native = native;
-    }
+    internal IWindow CreateNativeWindow()
+        => windowProvider.CreateWindow(
+            windowOptionsProvider.CreateOptions());
 }

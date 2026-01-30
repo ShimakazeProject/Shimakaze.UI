@@ -10,6 +10,16 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DependencyInjectionExtensions
 {
+    public static IServiceCollection UseInputContextProvider
+        <[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TInputContextProvider>(
+        this IServiceCollection services)
+        where TInputContextProvider : class, IInputContextProvider
+    {
+        services.TryAddSingleton<TInputContextProvider>();
+        services.TryAddSingleton<IInputContextProvider>(provider => provider.GetRequiredService<TInputContextProvider>());
+        return services;
+    }
+
     public static IServiceCollection UseWindowProvider
         <[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TWindowProvider>(
         this IServiceCollection services)

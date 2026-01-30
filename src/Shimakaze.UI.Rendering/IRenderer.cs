@@ -1,8 +1,10 @@
-﻿using SkiaSharp;
+﻿using Shimakaze.UI.Core;
+
+using SkiaSharp;
 
 namespace Shimakaze.UI.Rendering;
 
 public interface IRenderer
 {
-    SKSurface CreateSurface(Core.Window window);
+    SKSurface CreateSurface(INativeWindow window);
 }

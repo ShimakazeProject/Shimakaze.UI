@@ -6,9 +6,13 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DependencyInjectionExtensions
 {
-    public static IServiceCollection UseGlfw(this IServiceCollection services)
-        => services.UseGlfwWindowProvider();
+    public static IServiceCollection UseGlfw(this IServiceCollection services) => services
+        .UseGlfwWindowProvider()
+        .UseGlfwInputContextProvider();
 
     public static IServiceCollection UseGlfwWindowProvider(this IServiceCollection services)
-        => services.UseWindowProvider<GlfwWindowProvider>();
+        => services.UseWindowProvider<GlfwProvider>();
+
+    public static IServiceCollection UseGlfwInputContextProvider(this IServiceCollection services)
+        => services.UseInputContextProvider<GlfwProvider>();
 }

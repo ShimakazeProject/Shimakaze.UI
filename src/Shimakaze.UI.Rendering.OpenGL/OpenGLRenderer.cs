@@ -16,7 +16,7 @@ public sealed class OpenGLRenderer : Renderer
         var context = _cache.GetOrAdd(window, _ => new());
         if (context.ShouldRecreate(window))
             context.Create(window, ref _grContext);
-        
+
         return context.Surface;
     }
 }

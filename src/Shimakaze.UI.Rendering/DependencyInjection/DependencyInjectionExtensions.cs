@@ -1,3 +1,4 @@
+﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -16,6 +17,16 @@ public static class DependencyInjectionExtensions
         where TRenderer : class, IRenderer
     {
         services.TryAddSingleton<TRenderer>();
+        if (typeof(TRenderer).IsAssignableTo(typeof(Renderer)))
+        {
+            services.TryAddSingleton<Renderer>(provider =>
+            {
+                var result = provider.GetRequiredService<TRenderer>() as Renderer;
+                Debug.Assert(result is not null);
+                return result;
+            });
+        }
+
         services.TryAddSingleton<IRenderer>(provider => provider.GetRequiredService<TRenderer>());
         return services;
     }

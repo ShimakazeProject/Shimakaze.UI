@@ -6,5 +6,5 @@ namespace Shimakaze.UI.Rendering;
 
 public interface IRenderer
 {
-    SKSurface CreateSurface(INativeWindow window);
+    SKSurface GetSurface(INativeWindow window);
 }

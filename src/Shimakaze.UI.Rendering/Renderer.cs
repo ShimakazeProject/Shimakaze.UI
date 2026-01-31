@@ -1,4 +1,4 @@
-using Shimakaze.UI.Core;
+﻿using Shimakaze.UI.Core;
 
 using Silk.NET.Windowing;
 
@@ -8,8 +8,8 @@ namespace Shimakaze.UI.Rendering;
 
 public abstract class Renderer : IRenderer
 {
-    public SKSurface CreateSurface(INativeWindow window)
-        => CreateSurface(window.Native);
+    public SKSurface GetSurface(INativeWindow window)
+        => GetSurface(window.Native);
 
-    protected abstract SKSurface CreateSurface(IWindow window);
+    protected abstract SKSurface GetSurface(IWindow window);
 }

@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 
 using Silk.NET.Windowing;
 
@@ -11,7 +11,7 @@ public sealed class OpenGLRenderer : Renderer
     private readonly ConcurrentDictionary<IWindow, OpenGLRendererContext> _cache = [];
     private GRContext? _grContext;
 
-    protected override SKSurface CreateSurface(IWindow window)
+    protected override SKSurface GetSurface(IWindow window)
     {
         var context = _cache.GetOrAdd(window, _ => new());
         if (context.ShouldRecreate(window))

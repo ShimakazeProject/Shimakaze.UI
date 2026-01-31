@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Shimakaze.UI.Core.Dispatchers;
@@ -23,27 +24,20 @@ public sealed class Application : IHost
     public IServiceProvider Services { get; }
     public ILogger Logger { get; }
 
-    public Application(
-        IServiceProvider serviceProvider,
-        Dispatcher dispatcher,
-        WindowManager windowManager,
-        ILogger<Application> logger,
-        IWindowOptionsProvider windowOptionsProvider,
-        IWindowProvider windowProvider,
-        IHostApplicationLifetime lifetime)
+    public Application(IServiceProvider serviceProvider)
     {
         if (Instance is not null)
             throw new InvalidOperationException("Application is already initialized.");
 
         Instance = this;
-
-        WindowManager = windowManager;
-        Dispatcher = dispatcher;
         Services = serviceProvider;
-        Logger = logger;
-        _windowOptionsProvider = windowOptionsProvider;
-        _windowProvider = windowProvider;
-        _lifetime = lifetime;
+
+        _windowOptionsProvider = serviceProvider.GetRequiredService<IWindowOptionsProvider>();
+        _windowProvider = serviceProvider.GetRequiredService<IWindowProvider>();
+        _lifetime = serviceProvider.GetRequiredService<IHostApplicationLifetime>();
+        Logger = serviceProvider.GetRequiredService<ILogger<Application>>();
+        Dispatcher = serviceProvider.GetRequiredService<Dispatcher>();
+        WindowManager = serviceProvider.GetRequiredService<WindowManager>();
     }
 
 

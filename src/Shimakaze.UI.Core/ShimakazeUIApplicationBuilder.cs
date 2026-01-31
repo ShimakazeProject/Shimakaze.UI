@@ -56,13 +56,8 @@ public sealed class ShimakazeUIApplicationBuilder : IHostApplicationBuilder
     {
         Services.TryAddSingleton<Dispatcher>();
 
-        Services.TryAddSingleton(provider =>
-        {
-            return ActivatorUtilities.CreateInstance<Application>(provider);
-        });
+        Services.TryAddSingleton<WindowManager>();
 
-        var serviceProvider = Services.BuildServiceProvider();
-
-        return serviceProvider.GetRequiredService<Application>();
+        return new(Services.BuildServiceProvider());
     }
 }

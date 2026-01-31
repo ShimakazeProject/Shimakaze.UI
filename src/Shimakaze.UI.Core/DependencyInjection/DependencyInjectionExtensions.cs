@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -27,6 +27,18 @@ public static class DependencyInjectionExtensions
     {
         services.TryAddSingleton<TWindowOptionsProvider>();
         services.TryAddSingleton<IWindowOptionsProvider>(provider => provider.GetRequiredService<TWindowOptionsProvider>());
+        return services;
+    }
+
+    public static IServiceCollection AddWindow<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TWindow>(
+        this IServiceCollection services)
+        where TWindow : Window
+    {
+        var descriptor = ServiceDescriptor.Transient<Window, TWindow>();
+
+        services.TryAddEnumerable(descriptor);
+
         return services;
     }
 }

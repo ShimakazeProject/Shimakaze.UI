@@ -5,7 +5,6 @@ namespace Shimakaze.UI.Core;
 public sealed class WindowManager
 {
     private readonly LinkedList<INativeWindow> _windows = [];
-    private readonly Lock _lock = new();
 
     private bool _initialized = false;
     public bool IsEmpty => _windows.Count == 0;
@@ -16,19 +15,8 @@ public sealed class WindowManager
             return;
 
         INativeWindow nativeWindow = window;
-        LinkedListNode<INativeWindow> node;
-        lock (_lock)
-        {
-            node = _windows.AddLast(window);
-        }
-
-        window.Closed += (_, _) =>
-        {
-            lock (_lock)
-            {
-                _windows.Remove(node);
-            }
-        };
+        var node = _windows.AddLast(window);
+        window.Closed += (_, _) => _windows.Remove(node);
 
         if (_initialized)
             nativeWindow.Native.Initialize();
@@ -44,23 +32,25 @@ public sealed class WindowManager
         // 什么也不做 因为 Window 构造方法已经注册了
         _ = Application.Instance.Services.GetServices<Window>();
 
-        lock (_lock)
+        var node = _windows.First;
+        while (node != null)
         {
-            foreach (var window in _windows)
-                window.Native.Initialize();
+            var window = node.Value.Native;
+            window.Initialize();
+            node = node.Next;
         }
     }
 
     internal void Update()
     {
-        lock (_lock)
+        var node = _windows.First;
+        while (node != null)
         {
-            foreach (var window in _windows)
-            {
-                window.Native.DoEvents();
-                window.Native.DoUpdate();
-                window.Native.DoRender();
-            }
+            var window = node.Value.Native;
+            window.DoEvents();
+            window.DoUpdate();
+            window.DoRender();
+            node = node.Next;
         }
     }
 }

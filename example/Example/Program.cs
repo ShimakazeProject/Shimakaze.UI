@@ -1,13 +1,8 @@
-﻿using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Formats.Asn1;
-
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Shimakaze.UI.Core;
-using Shimakaze.UI.Input;
 using Shimakaze.UI.Rendering;
 
 using SkiaSharp;
@@ -21,7 +16,7 @@ var app = builder.Build();
 
 await app.RunAsync();
 
-sealed class MainWindow(IRenderer renderer, ILogger<MainWindow> logger) : Window
+sealed class MainWindow(IRenderer renderer) : Window
 {
     private int _h;
 

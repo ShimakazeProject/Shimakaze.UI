@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/example/">
+    <Project Path="example/AniInstaller/AniInstaller.csproj" />
     <Project Path="example/Example/Example.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">

@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Shimakaze.UI.Glfw\Shimakaze.UI.Glfw.csproj" />
+    <ProjectReference Include="..\..\src\Shimakaze.UI.Rendering.OpenGL\Shimakaze.UI.Rendering.OpenGL.csproj" />
+  </ItemGroup>
+
+</Project>

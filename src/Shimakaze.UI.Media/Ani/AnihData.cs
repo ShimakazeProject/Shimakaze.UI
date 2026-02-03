@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Shimakaze.UI.Media.Cursor;
+namespace Shimakaze.UI.Media.Ani;
 
 /// <summary>
 /// 动画头

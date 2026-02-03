@@ -1,8 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <PackageReference Include="Silk.NET.Core" />
     <PackageReference Include="SkiaSharp" />
-  </ItemGroup>
-  <ItemGroup>
-    <InternalsVisibleTo Include="Shimakaze.UI.Media.Cursor" />
   </ItemGroup>
 </Project>

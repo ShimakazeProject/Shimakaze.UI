@@ -16,7 +16,6 @@
   <Project Path="src/Shimakaze.UI.Core/Shimakaze.UI.Core.csproj" />
   <Project Path="src/Shimakaze.UI.Glfw/Shimakaze.UI.Glfw.csproj" />
   <Project Path="src/Shimakaze.UI.Input/Shimakaze.UI.Input.csproj" />
-  <Project Path="src/Shimakaze.UI.Media.Cursor/Shimakaze.UI.Media.Cursor.csproj" />
   <Project Path="src/Shimakaze.UI.Media/Shimakaze.UI.Media.csproj" />
   <Project Path="src/Shimakaze.UI.Rendering.OpenGL/Shimakaze.UI.Rendering.OpenGL.csproj" />
   <Project Path="src/Shimakaze.UI.Rendering/Shimakaze.UI.Rendering.csproj" />

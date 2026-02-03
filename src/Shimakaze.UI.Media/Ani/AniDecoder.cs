@@ -1,19 +1,19 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-using Shimakaze.UI.Input.Cursors;
+using Shimakaze.UI.Media.Cur;
 using Shimakaze.UI.Media.Internal;
 using Shimakaze.UI.Media.Riff;
 
-namespace Shimakaze.UI.Media.Cursor;
+using SkiaSharp;
+
+namespace Shimakaze.UI.Media.Ani;
 
 public static class AniDecoder
 {
-    public static Input.Cursors.Cursor Decode(Stream stream)
-        => Input.Cursors.Cursor.Custom(DecodeCore(stream));
-
-    private static IEnumerable<JiffiesCursorFrame> DecodeCore(Stream stream)
+    public static IEnumerable<(SKBitmap Bitmap, uint Jiffies, SKPointI HotSpot)> DecodeFramesWithMetadata(Stream stream, CursorSelector? selector = null)
     {
         var basePosition = stream.Position;
 
@@ -47,20 +47,26 @@ public static class AniDecoder
             rate = MemoryMarshal.Cast<byte, uint>(chunk.Data.Span);
         Debug.Assert(rate.Length == anih.Steps);
 
-        List<JiffiesCursorFrame> frames = new((int)anih.Frames);
+
+        List<(SKBitmap Bitmap, uint Jiffies, SKPointI HotSpot)> frames = new((int)anih.Frames);
         for (int i = 0; i < anih.Frames; i++)
         {
             using ReadOnlyMemoryStream ms = new(icons[i].Data);
-            var (hotspot, bitmap) = CurDecoder.DecodeCore(ms);
+            CurDecoder.Decode(ms, out var bitmap, out var hotspot, selector);
             var jiffies = rate[i];
 
-            JiffiesCursorFrame frame = new(hotspot, bitmap, jiffies);
-            frames.Add(frame);
+            frames.Add(new(bitmap, jiffies, hotspot));
         }
 
         var sequence = seq.ToArray();
         for (int i = 0; i < anih.Steps; i++)
             yield return frames[sequence[i]];
+    }
+
+    public static IEnumerable<(SKBitmap Bitmap, uint Jiffies)> DecodeFrames(Stream stream, CursorSelector? selector = null)
+    {
+        foreach (var (bitmap, jiffies, _) in DecodeFramesWithMetadata(stream, selector))
+            yield return (bitmap, jiffies);
     }
 
     private static ImmutableArray<RiffChunkData> ParseList(ReadOnlyMemory<byte> data)

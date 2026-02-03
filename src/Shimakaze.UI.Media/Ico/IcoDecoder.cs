@@ -11,10 +11,7 @@ public static class IcoDecoder
 {
     private static readonly byte[] PngMagic = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
 
-    public static IEnumerable<SKBitmap> Decode(Stream stream)
-        => DecodeCore(stream).Select(static i => i.Bitmap);
-
-    internal static IEnumerable<(SKBitmap Bitmap, IconDirEntry Entry, BitmapInfoHeader? BitmapInfo, bool IsPng)> DecodeCore(Stream stream)
+    public static IEnumerable<(SKBitmap Bitmap, IconDirEntry Entry, BitmapInfoHeader? BitmapInfo, bool IsPng)> DecodeWithMetadata(Stream stream)
     {
         var basePosition = stream.Position;
 
@@ -60,4 +57,8 @@ public static class IcoDecoder
             }
         }
     }
+
+    public static IEnumerable<SKBitmap> Decode(Stream stream)
+        => DecodeWithMetadata(stream).Select(static i => i.Bitmap);
+
 }

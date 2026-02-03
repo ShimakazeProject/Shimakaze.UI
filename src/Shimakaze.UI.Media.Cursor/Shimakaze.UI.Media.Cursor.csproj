@@ -1,8 +1,0 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="..\Shimakaze.UI.Input\Shimakaze.UI.Input.csproj" />
-    <ProjectReference Include="..\Shimakaze.UI.Media\Shimakaze.UI.Media.csproj" />
-  </ItemGroup>
-
-</Project>

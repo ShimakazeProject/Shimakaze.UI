@@ -1,6 +1,3 @@
-
-using System.Collections;
-
 using Shimakaze.UI.Media.Bmp;
 using Shimakaze.UI.Media.Ico;
 

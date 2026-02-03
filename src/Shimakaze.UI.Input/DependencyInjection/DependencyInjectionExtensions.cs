@@ -16,7 +16,7 @@ public static class DependencyInjectionExtensions
         where TInputContextProvider : class, IInputContextProvider
     {
         services.TryAddTransient<InputManager>();
-        
+
         services.TryAddSingleton<TInputContextProvider>();
         services.TryAddSingleton<IInputContextProvider>(provider => provider.GetRequiredService<TInputContextProvider>());
         return services;

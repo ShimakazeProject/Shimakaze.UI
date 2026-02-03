@@ -32,10 +32,7 @@ sealed class MainWindow(IRenderer renderer) : Window
     {
         base.OnInitialize();
         using var typeface = SKTypeface.FromFamilyName("Microsoft YaHei UI");
-        _fontHeader = new(typeface, 12)
-        {
-            SkewX = -0.1f
-        };
+        _fontHeader = new(typeface, 12);
         _font16 = new(typeface, 16);
         _descent = _font16.Metrics.Descent;
         _shaper = new(typeface);

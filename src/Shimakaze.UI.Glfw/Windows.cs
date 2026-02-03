@@ -19,27 +19,28 @@ internal static class Windows
 {
     public static void Register(IWindow window)
     {
+        if (!window.IsInitialized)
+        {
+            window.Load += () => Register(window);
+            return;
+        }
+
         if (window is not { Native.Win32.Hwnd: { } hWnd })
             return;
 
         HWND hwnd = (HWND)hWnd;
 
-        if (window.IsInitialized)
-            InitializeWindow(hwnd);
-        else
-            window.Load += () => InitializeWindow(hwnd);
-    }
-
-    private static unsafe void InitializeWindow(HWND hwnd)
-    {
         if (OperatingSystem.IsWindowsVersionAtLeast(5))
         {
-            var threadId = Win32.GetWindowThreadProcessId(hwnd);
-            Win32.SetWindowsHookEx(
+            unsafe
+            {
+                var threadId = Win32.GetWindowThreadProcessId(hwnd);
+                Win32.SetWindowsHookEx(
                     WINDOWS_HOOK_ID.WH_CALLWNDPROC,
                     &CallWndProc,
                     null,
                     threadId);
+            }
         }
 
         SetWindowTitlebar(hwnd, AppThemeIsDark());

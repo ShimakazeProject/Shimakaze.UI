@@ -4,14 +4,14 @@ using SkiaSharp;
 
 static class CursorHelper
 {
-    public static IEnumerable<Cursors> LoadCursor(string folderPath)
+    public static async IAsyncEnumerable<Cursors> LoadCursor(string folderPath)
     {
         foreach (var folder in Directory.EnumerateDirectories(folderPath))
         {
             var files = Directory.GetFiles(folder, "*.ani");
             if (files.Length is 0)
             {
-                foreach (var item in LoadCursor(folder))
+                await foreach (var item in LoadCursor(folder))
                     yield return item;
 
                 continue;
@@ -25,17 +25,17 @@ static class CursorHelper
             Cursors cursors = new(name.ToString());
             foreach (var file in files)
             {
-                var cursor = LoadFrame(file);
-                ApplyToCollection(file, [.. cursor], cursors);
+                var cursor = LoadFrameAsync(file);
+                ApplyToCollection(file, await cursor.ToListAsync(), cursors);
             }
 
             yield return cursors;
         }
     }
 
-    private static IEnumerable<SKBitmap> LoadFrame(string path)
+    private static async IAsyncEnumerable<SKBitmap> LoadFrameAsync(string path)
     {
-        using var fs = File.OpenRead(path);
+        await using var fs = File.OpenRead(path);
         foreach (var (bitmap, jiffies) in AniDecoder.DecodeFrames(fs))
         {
             for (uint i = 0; i < jiffies; i++)

@@ -12,7 +12,7 @@ using SkiaSharp.HarfBuzz;
 
 sealed class MainWindow(IRenderer renderer) : Window
 {
-    private readonly List<Cursors> _cursors = [];
+    private readonly LinkedList<Cursors> _cursors = [];
 
     private readonly double _tick = 1 / 60d;
     private double _total = 0;
@@ -28,7 +28,7 @@ sealed class MainWindow(IRenderer renderer) : Window
     private SKPaint? _paint;
     private float _descent;
 
-    protected override void OnInitialize()
+    protected override async void OnInitialize()
     {
         base.OnInitialize();
         using var typeface = SKTypeface.FromFamilyName("Microsoft YaHei UI");
@@ -44,26 +44,37 @@ sealed class MainWindow(IRenderer renderer) : Window
 
         INativeWindow native = this;
         var size = native.Native.Size;
-        size.X = 600;
+        size.X = 720;
         native.Native.Size = size;
 
         var height = native.Native.Size.Y - StartY;
         var count = height / _cursorWidth + 1;
 
         this.Input.MouseScroll += Scroll;
-        this.Input.MouseDoubleClick += DoubleClick;
-        _cursors.AddRange(CursorHelper.LoadCursor(Path.Combine(AppContext.BaseDirectory, "cursors")));
+        this.Input.MouseClick += Click;
 
-        var bitmaps = _cursors
-            .SelectMany(static i => i.GetAllFrames().SelectMany(static i => i));
+        await Task.Run(async () =>
+        {
+            await foreach (var cursor in CursorHelper.LoadCursor(Path.Combine(AppContext.BaseDirectory, "cursors")))
+            {
+                _cursors.AddLast(cursor);
 
-        _cursorWidth = Math.Max(32, bitmaps.Max(i => i.Width));
-        _cursorHeight = Math.Max(32, bitmaps.Max(i => i.Height));
+                foreach (var bitmap in cursor.GetAllBitmaps())
+                {
+                    _cursorWidth = Math.Max(_cursorWidth, bitmap.Width);
+                    _cursorHeight = Math.Max(_cursorHeight, bitmap.Height);
+                }
+            }
+        }).ConfigureAwait(false);
     }
 
-    private void DoubleClick(InputManager sender, MouseClickEventArgs eventArgs)
+    private void Click(InputManager sender, MouseClickEventArgs eventArgs)
     {
         if (eventArgs.Button is not MouseButton.Left)
+            return;
+
+        int x = StartX + _cursorWidth * 15;
+        if (eventArgs.Position.X < x)
             return;
 
         // var y = eventArgs.Position.Y;
@@ -113,8 +124,12 @@ sealed class MainWindow(IRenderer renderer) : Window
         y += (int)(_offsetY * _cursorHeight);
 
         PrintHeader(surface.Canvas);
-        foreach (var cursor in _cursors)
+        var node = _cursors.First;
+        while (node is not null)
         {
+            var cursor = node.Value;
+            node = node.Next;
+
             var frames = cursor.GetFrame(frame);
             var draw = y >= StartY;
             if (y > native.Native.Size.Y)
@@ -123,45 +138,26 @@ sealed class MainWindow(IRenderer renderer) : Window
             if (draw)
             {
                 x = StartX;
+                var textY = y + (_cursorHeight / 2) + _descent;
                 surface.Canvas.DrawShapedText(
                     _shaper,
                     cursor.Name,
                     x,
-                    y + (_cursorHeight / 2) + _descent,
+                    textY,
                     SKTextAlign.Right,
                     _font16,
                     _paint);
 
-                surface.Canvas.DrawBitmap(frames.Arrow, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.Help, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.AppStarting, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.Wait, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.Crosshair, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.IBeam, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.NWPen, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.No, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.SizeNS, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.SizeWE, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.SizeNWSE, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.SizeNESW, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.SizeAll, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.UpArrow, x, y);
-                x += _cursorWidth;
-                surface.Canvas.DrawBitmap(frames.Hand, x, y);
-                x += _cursorWidth;
+                frames.Draw(surface.Canvas, ref x, y, _cursorWidth);
+
+                surface.Canvas.DrawShapedText(
+                    _shaper,
+                    "Apply",
+                    x,
+                    textY,
+                    SKTextAlign.Left,
+                    _font16,
+                    _paint);
             }
 
             y += _cursorHeight;

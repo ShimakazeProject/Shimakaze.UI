@@ -15,4 +15,8 @@
     <PackageReference Include="SkiaSharp.HarfBuzz" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="cursors\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  
 </Project>

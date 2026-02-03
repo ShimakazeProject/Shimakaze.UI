@@ -17,7 +17,8 @@ sealed class MainWindow(IRenderer renderer) : Window
     private double _offsetY = 0;
     private const int StartX = 120;
     private const int StartY = 64;
-    private const int Block = 32;
+    private int _cursorWidth = 32;
+    private int _cursorHeight = 32;
     private SKShaper? _shaper;
     private SKFont? _fontHeader;
     private SKFont? _font16;
@@ -47,10 +48,16 @@ sealed class MainWindow(IRenderer renderer) : Window
         native.Native.Size = size;
 
         var height = native.Native.Size.Y - StartY;
-        var count = height / Block + 1;
+        var count = height / _cursorWidth + 1;
 
         this.Input.MouseScroll += Scroll;
-        _cursors.AddRange(LoadCursor(@""));
+        _cursors.AddRange(CursorHelper.LoadCursor(Path.Combine(AppContext.BaseDirectory, "cursors")));
+
+        var bitmaps = _cursors
+            .SelectMany(static i => i.GetAllFrames().SelectMany(static i => i));
+
+        _cursorWidth = Math.Max(32, bitmaps.Max(i => i.Width));
+        _cursorHeight = Math.Max(32, bitmaps.Max(i => i.Height));
     }
 
     private void Scroll(InputManager sender, MouseScrollEventArgs eventArgs)
@@ -72,8 +79,7 @@ sealed class MainWindow(IRenderer renderer) : Window
 
         int y = StartY, x;
 
-        y += (int)(_offsetY * Block);
-
+        y += (int)(_offsetY * _cursorHeight);
 
         PrintHeader(surface.Canvas);
         foreach (var cursor in _cursors)
@@ -86,60 +92,48 @@ sealed class MainWindow(IRenderer renderer) : Window
             if (draw)
             {
                 x = StartX;
+                surface.Canvas.DrawShapedText(
+                    _shaper,
+                    cursor.Name,
+                    x,
+                    y + (_cursorHeight / 2) + _descent,
+                    SKTextAlign.Right,
+                    _font16,
+                    _paint);
+
                 surface.Canvas.DrawBitmap(frames.Arrow, x, y);
-                x += frames.Arrow.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.Help, x, y);
-                x += frames.Help.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.AppStarting, x, y);
-                x += frames.AppStarting.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.Wait, x, y);
-                x += frames.Wait.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.Crosshair, x, y);
-                x += frames.Crosshair.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.IBeam, x, y);
-                x += frames.IBeam.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.NWPen, x, y);
-                x += frames.NWPen.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.No, x, y);
-                x += frames.No.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.SizeNS, x, y);
-                x += frames.SizeNS.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.SizeWE, x, y);
-                x += frames.SizeWE.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.SizeNWSE, x, y);
-                x += frames.SizeNWSE.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.SizeNESW, x, y);
-                x += frames.SizeNESW.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.SizeAll, x, y);
-                x += frames.SizeAll.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.UpArrow, x, y);
-                x += frames.UpArrow.Width;
+                x += _cursorWidth;
                 surface.Canvas.DrawBitmap(frames.Hand, x, y);
-                x += frames.Hand.Width;
+                x += _cursorWidth;
             }
 
-            var height = new[]
-            {
-                frames.Arrow.Height,
-                frames.Help.Height,
-                frames.AppStarting.Height,
-                frames.Wait.Height,
-                frames.Crosshair.Height,
-                frames.IBeam.Height,
-                frames.NWPen.Height,
-                frames.No.Height,
-                frames.SizeNS.Height,
-                frames.SizeWE.Height,
-                frames.SizeNWSE.Height,
-                frames.SizeNESW.Height,
-                frames.SizeAll.Height,
-                frames.UpArrow.Height,
-                frames.Hand.Height,
-            }.Max();
-            y += height;
-
-            if (draw)
-                surface.Canvas.DrawShapedText(_shaper, cursor.Name, StartX, y - (height / 2) + _descent, SKTextAlign.Right, _font16, _paint);
+            y += _cursorHeight;
         }
 
         surface.Flush();
@@ -153,35 +147,35 @@ sealed class MainWindow(IRenderer renderer) : Window
         canvas.Translate(0, 0);
 
         canvas.RotateDegrees(-degrees);
-        (x, y) = RotatePointDegrees(StartX + (Block * (1 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (1 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "Arrow", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (2 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (2 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "Help", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (3 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (3 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "AppStarting", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (4 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (4 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "Wait", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (5 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (5 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "Crosshair", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (6 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (6 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "IBeam", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (7 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (7 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "NWPen", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (8 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (8 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "No", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (9 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (9 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "SizeNS", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (10 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (10 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "SizeWE", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (11 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (11 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "SizeNWSE", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (12 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (12 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "SizeNESW", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (13 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (13 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "SizeAll", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (14 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (14 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "UpArrow", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (Block * (15 - 1)) + (Block / 2), StartY, degrees);
+        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (15 - 1)) + (_cursorWidth / 2), StartY, degrees);
         canvas.DrawShapedText(_shaper, "Hand", x, y, SKTextAlign.Left, _fontHeader, _paint);
         canvas.RotateDegrees(degrees);
     }
@@ -221,100 +215,4 @@ sealed class MainWindow(IRenderer renderer) : Window
         float radians = degrees * (float)Math.PI / 180f;
         return RotatePoint(x, y, radians);
     }
-
-    private static IEnumerable<Cursors> LoadCursor(string folderPath)
-    {
-        foreach (var folder in Directory.EnumerateDirectories(folderPath))
-        {
-            var files = Directory.GetFiles(folder, "*.ani");
-            if (files.Length is 0)
-            {
-                foreach (var item in LoadCursor(folder))
-                    yield return item;
-
-                continue;
-            }
-
-            ReadOnlySpan<char> name = Path.GetFileName(folder);
-            name = name[..^7];
-            if (name.IndexOf('_') is int i and not -1)
-                name = name[(i + 1)..];
-
-            Cursors cursors = new(name.ToString());
-            foreach (var file in files)
-            {
-                var cursor = LoadFrame(file);
-                ApplyToCollection(file, [.. cursor], cursors);
-            }
-
-            yield return cursors;
-        }
-    }
-
-    private static IEnumerable<SKBitmap> LoadFrame(string path)
-    {
-        using var fs = File.OpenRead(path);
-        foreach (var (bitmap, jiffies) in AniDecoder.DecodeFrames(fs))
-        {
-            for (uint i = 0; i < jiffies; i++)
-                yield return bitmap;
-        }
-    }
-
-    private static void ApplyToCollection(string fileName, IReadOnlyList<SKBitmap> cursor, Cursors cursors)
-    {
-        switch (Path.GetFileNameWithoutExtension(fileName))
-        {
-            case "通常":
-            case "通常の選択":
-                cursors.Arrow = cursor;
-                break;
-            case "ヘルプの選択":
-                cursors.Help = cursor;
-                break;
-            case "バックグラウンドで作業中":
-                cursors.AppStarting = cursor;
-                break;
-            case "待ち状態":
-                cursors.Wait = cursor;
-                break;
-            case "領域選択":
-                cursors.Crosshair = cursor;
-                break;
-            case "テキスト選択":
-                cursors.IBeam = cursor;
-                break;
-            case "手書き":
-                cursors.NWPen = cursor;
-                break;
-            case "利用不可":
-                cursors.No = cursor;
-                break;
-            case "上下に拡大縮小":
-                cursors.SizeNS = cursor;
-                break;
-            case "左右に拡大縮小":
-                cursors.SizeWE = cursor;
-                break;
-            case "斜めに拡大縮小1":
-                cursors.SizeNWSE = cursor;
-                break;
-            case "斜めに拡大縮小2":
-                cursors.SizeNESW = cursor;
-                break;
-            case "移動":
-                cursors.SizeAll = cursor;
-                break;
-            case "代替選択":
-                cursors.UpArrow = cursor;
-                break;
-            case "リンクの選択":
-                cursors.Hand = cursor;
-                break;
-            default:
-                break;
-        }
-    }
-
-
 }

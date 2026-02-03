@@ -1,8 +1,11 @@
+using Microsoft.Extensions.Logging;
+
 using Shimakaze.UI.Core;
 using Shimakaze.UI.Input;
 using Shimakaze.UI.Input.EventArgs;
-using Shimakaze.UI.Media.Ani;
 using Shimakaze.UI.Rendering;
+
+using Silk.NET.Input;
 
 using SkiaSharp;
 using SkiaSharp.HarfBuzz;
@@ -51,6 +54,7 @@ sealed class MainWindow(IRenderer renderer) : Window
         var count = height / _cursorWidth + 1;
 
         this.Input.MouseScroll += Scroll;
+        this.Input.MouseDoubleClick += DoubleClick;
         _cursors.AddRange(CursorHelper.LoadCursor(Path.Combine(AppContext.BaseDirectory, "cursors")));
 
         var bitmaps = _cursors
@@ -58,6 +62,36 @@ sealed class MainWindow(IRenderer renderer) : Window
 
         _cursorWidth = Math.Max(32, bitmaps.Max(i => i.Width));
         _cursorHeight = Math.Max(32, bitmaps.Max(i => i.Height));
+    }
+
+    private void DoubleClick(InputManager sender, MouseClickEventArgs eventArgs)
+    {
+        if (eventArgs.Button is not MouseButton.Left)
+            return;
+
+        // var y = eventArgs.Position.Y;
+        int y = StartY;
+        y += (int)(_offsetY * _cursorHeight);
+
+        foreach (var cursor in _cursors)
+        {
+            try
+            {
+                if (y < StartY)
+                    continue;
+
+                if (eventArgs.Position.Y >= y && eventArgs.Position.Y < y + _cursorHeight)
+                {
+                    cursor.Install();
+                    break;
+                }
+            }
+            finally
+            {
+                y += _cursorHeight;
+            }
+        }
+
     }
 
     private void Scroll(InputManager sender, MouseScrollEventArgs eventArgs)
@@ -85,7 +119,7 @@ sealed class MainWindow(IRenderer renderer) : Window
         foreach (var cursor in _cursors)
         {
             var frames = cursor.GetFrame(frame);
-            var draw = y >= 64;
+            var draw = y >= StartY;
             if (y > native.Native.Size.Y)
                 break;
 
@@ -179,7 +213,6 @@ sealed class MainWindow(IRenderer renderer) : Window
         canvas.DrawShapedText(_shaper, "Hand", x, y, SKTextAlign.Left, _fontHeader, _paint);
         canvas.RotateDegrees(degrees);
     }
-
 
     /// <summary>
     /// 绕原点(0,0)旋转坐标点

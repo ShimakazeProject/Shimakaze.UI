@@ -6,7 +6,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Shimakaze.UI.Glfw\Shimakaze.UI.Glfw.csproj" />
+    <ProjectReference Include="..\..\src\Shimakaze.UI.Input\Shimakaze.UI.Input.csproj" />
+    <ProjectReference Include="..\..\src\Shimakaze.UI.Media\Shimakaze.UI.Media.csproj" />
     <ProjectReference Include="..\..\src\Shimakaze.UI.Rendering.OpenGL\Shimakaze.UI.Rendering.OpenGL.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp.HarfBuzz" />
   </ItemGroup>
 
 </Project>

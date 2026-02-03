@@ -13,5 +13,6 @@
     <PackageVersion Include="Silk.NET.Windowing.Common" Version="2.23.0" />
     <PackageVersion Include="Silk.NET.Windowing.Glfw" Version="2.23.0" />
     <PackageVersion Include="SkiaSharp" Version="3.119.1" />
+    <PackageVersion Include="SkiaSharp.HarfBuzz" Version="3.119.1" />
   </ItemGroup>
 </Project>

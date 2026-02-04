@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 using Shimakaze.UI.Core;
 using Shimakaze.UI.Input;
 using Shimakaze.UI.Input.EventArgs;

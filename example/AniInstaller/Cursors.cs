@@ -1,10 +1,6 @@
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using System.Text;
-
-using Shimakaze.UI.Core;
-using Shimakaze.UI.Core.Dispatchers;
 
 using SkiaSharp;
 

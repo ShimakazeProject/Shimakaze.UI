@@ -9,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+<PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="SkiaSharp.HarfBuzz" />
   </ItemGroup>
 

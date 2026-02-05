@@ -4,7 +4,7 @@ using Shimakaze.UI.Rendering;
 
 namespace Shimakaze.UI.Controls;
 
-public abstract partial class Visual : ObservableObject
+public abstract partial class Visual : BindableObject
 {
     /// <summary>
     /// 父元素。

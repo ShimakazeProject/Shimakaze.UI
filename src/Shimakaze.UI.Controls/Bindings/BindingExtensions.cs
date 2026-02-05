@@ -1,23 +1,32 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
+using Shimakaze.UI.Controls;
+
 namespace Shimakaze.UI.Bindings;
 
 public static class BindingExtensions
 {
-    public static Binding Bind<TTarget, TSource, TValue>(
-        this TTarget target,
+    /// <summary>
+    /// 创建并添加数据绑定。
+    /// </summary>
+    public static TView Bind<TView, TViewModel, T>(
+        this TView view,
         BindingMode mode,
-        TSource source,
-        Expression<Func<TSource, TValue>> sourceProperty,
-        Expression<Func<TTarget, TValue>> targetProperty)
-        where TTarget : notnull
-        where TSource : notnull
+        TViewModel vm,
+        Expression<Func<TViewModel, T>> vmProperty,
+        Expression<Func<TView, T>> viewProperty)
+        where TView : notnull, BindableObject
+        where TViewModel : notnull
     {
-        var sourceProp = GetPropertyInfo(sourceProperty);
-        var targetProp = GetPropertyInfo(targetProperty);
+        var sourceProp = GetPropertyInfo(vmProperty);
+        var targetProp = GetPropertyInfo(viewProperty);
 
-        return new Binding(mode, target, source, sourceProp, targetProp);
+        Binding binding = new(mode, view, vm, sourceProp, targetProp);
+
+        view.AddBinding(targetProp, binding);
+
+        return view;
     }
 
     private static PropertyInfo GetPropertyInfo<T, TValue>(Expression<Func<T, TValue>> expression)

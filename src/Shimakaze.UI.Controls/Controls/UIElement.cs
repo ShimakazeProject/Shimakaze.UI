@@ -8,13 +8,17 @@ namespace Shimakaze.UI.Controls;
 
 public abstract partial class UIElement : Visual
 {
-    private readonly List<Binding> _bindings = [];
+    /// <summary>
+    /// 是否拥有焦点。
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsFocused { get; private set; }
 
     /// <summary>
     /// 是否启用。
     /// </summary>
     [ObservableProperty]
-    public partial bool Enabled { get; set; } = true;
+    public partial bool IsEnabled { get; set; } = true;
 
     /// <summary>
     /// 附加的任意数据。
@@ -73,51 +77,30 @@ public abstract partial class UIElement : Visual
     public event UIEventHandler<UIElement, KeyboardKeyEventArgs>? KeyUp;
 
     /// <summary>
+    /// 控件获得焦点事件。
+    /// </summary>
+    public event UIEventHandler<UIElement, EventArgs>? GotFocus;
+
+    /// <summary>
+    /// 控件失去焦点事件。
+    /// </summary>
+    public event UIEventHandler<UIElement, EventArgs>? LostFocus;
+
+    /// <summary>
     /// 判断给定的点是否在此元素的渲染区域内。
     /// </summary>
     /// <param name="point">测试点（屏幕坐标）</param>
     /// <returns>如果点在元素内则返回 true，否则返回 false</returns>
-    public virtual bool HitTest(Point point)
-    {
-        if (!Enabled)
-            return false;
-
-        return RenderBounds.Contains(point.X, point.Y);
-    }
+    public virtual bool HitTest(PointF point)
+        => IsEnabled && RenderBounds.Contains(point);
 
     /// <summary>
     /// 在指定点执行命中测试，返回最底层的命中元素。
     /// </summary>
     /// <param name="point">测试点</param>
     /// <returns>命中的元素，如果没有命中则返回 null</returns>
-    public virtual UIElement? HitTestElement(Point point) => HitTest(point) ? this : null;
-
-    /// <summary>
-    /// 添加数据绑定。
-    /// </summary>
-    /// <param name="binding">要添加的绑定</param>
-    public void AddBinding(Binding binding)
-        => _bindings.Add(binding);
-
-    /// <summary>
-    /// 创建并添加数据绑定。
-    /// </summary>
-    public UIElement Bind<TSource, TValue>(
-        BindingMode mode,
-        TSource source,
-        System.Linq.Expressions.Expression<Func<TSource, TValue>> sourceProperty,
-        System.Linq.Expressions.Expression<Func<UIElement, TValue>> targetProperty)
-        where TSource : notnull
-    {
-        AddBinding(this.Bind<UIElement, TSource, TValue>(mode, source, sourceProperty, targetProperty));
-        return this;
-    }
-
-    /// <summary>
-    /// 清除所有绑定。
-    /// </summary>
-    public void ClearBindings()
-        => _bindings.Clear();
+    public virtual UIElement? HitTestElement(PointF point)
+        => HitTest(point) ? this : null;
 
     /// <summary>
     /// 触发 Loaded 事件。
@@ -178,4 +161,47 @@ public abstract partial class UIElement : Visual
     /// </summary>
     protected virtual void OnKeyUp(KeyboardKeyEventArgs e)
         => KeyUp?.Invoke(this, e);
+
+
+    /// <summary>
+    /// 请求焦点到此控件。
+    /// </summary>
+    /// <returns>如果成功获得焦点则返回 true，否则返回 false</returns>
+    public virtual bool Focus()
+    {
+        if (!IsFocused || !IsEnabled || Visiblity is not Visiblity.Visible)
+            return false;
+
+        IsFocused = true;
+        OnGotFocus();
+        return true;
+    }
+
+    /// <summary>
+    /// 释放焦点。
+    /// </summary>
+    public virtual void Unfocus()
+    {
+        if (!IsFocused)
+            return;
+
+        IsFocused = false;
+        OnLostFocus();
+    }
+
+    /// <summary>
+    /// 触发 GotFocus 事件。
+    /// </summary>
+    protected virtual void OnGotFocus()
+    {
+        GotFocus?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// 触发 LostFocus 事件。
+    /// </summary>
+    protected virtual void OnLostFocus()
+    {
+        LostFocus?.Invoke(this, EventArgs.Empty);
+    }
 }

@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Reflection;
 
-namespace Shimakaze.UI.Controls;
+namespace Shimakaze.UI.Bindings;
 
 public sealed class Binding
 {

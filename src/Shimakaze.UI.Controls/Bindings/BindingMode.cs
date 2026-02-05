@@ -1,4 +1,4 @@
-namespace Shimakaze.UI.Controls;
+namespace Shimakaze.UI.Bindings;
 
 [Flags]
 public enum BindingMode

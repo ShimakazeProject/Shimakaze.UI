@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Shimakaze.UI.Controls;
+namespace Shimakaze.UI.Bindings;
 
 public static class BindingExtensions
 {

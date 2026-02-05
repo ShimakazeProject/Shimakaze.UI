@@ -1,4 +1,5 @@
 ﻿using SkiaSharp;
+using SkiaSharp.HarfBuzz;
 
 namespace Shimakaze.UI.Fonts;
 
@@ -8,31 +9,61 @@ public static class FontManager
     private static readonly Dictionary<Font, SKFontStyle> Fontstyles = [];
     private static readonly Dictionary<Font, SKTypeface> Typefaces = [];
     private static readonly Dictionary<Font, SKFont> Fonts = [];
+    private static readonly Dictionary<Font, SKShaper> Shapers = [];
+    private static SKShaper? s_defaultShapers;
 
-    public static SKFont GetFont(Font? font)
+    public static SKFontStyle GetFontStyle(Font? font = default)
     {
         if (font is null)
-            return DefaultFont.Value;
+            return SKFontStyle.Normal;
 
         if (!Fontstyles.TryGetValue(font, out var fontstyle))
         {
-            Fontstyles[font] = fontstyle = new(font.Weight, font.Width, font.Slant switch
-            {
-                FontStyleSlant.Upright => SKFontStyleSlant.Upright,
-                FontStyleSlant.Italic => SKFontStyleSlant.Italic,
-                FontStyleSlant.Oblique => SKFontStyleSlant.Oblique,
-                _ => throw new NotSupportedException(),
-            });
+            Fontstyles[font] = fontstyle = new(font.Weight, font.Width, font.Slant.ToSkia());
 
             font.Disposed += () => Fontstyles.Remove(font);
         }
 
+        return fontstyle;
+    }
+    public static SKTypeface GetTypeface(Font? font = default, SKFontStyle? fontStyle = default)
+    {
+        if (font is null)
+            return SKTypeface.Default;
+
+        fontStyle ??= GetFontStyle(font);
+
         if (!Typefaces.TryGetValue(font, out var typeface))
         {
-            Typefaces[font] = typeface = SKTypeface.FromFamilyName(font.FamilyName, fontstyle);
+            Typefaces[font] = typeface = SKTypeface.FromFamilyName(font.FamilyName, fontStyle);
 
             font.Disposed += () => Typefaces.Remove(font);
         }
+
+        return typeface;
+    }
+    public static SKShaper GetShaper(Font? font = default, SKTypeface? typeface = default)
+    {
+        typeface ??= GetTypeface(font);
+        if (font is null)
+            return s_defaultShapers ??= new(typeface);
+
+        if (!Shapers.TryGetValue(font, out var shaper))
+        {
+            Shapers[font] = shaper = new(typeface);
+
+            font.Disposed += () => Shapers.Remove(font);
+        }
+
+        return shaper;
+    }
+    public static SKFont GetFont(Font? font = default, SKTypeface? typeface = default, SKFontStyle? fontStyle = default)
+    {
+        if (font is null)
+            return DefaultFont.Value;
+
+        fontStyle ??= GetFontStyle(font);
+        typeface ??= GetTypeface(font, fontStyle);
 
         if (!Fonts.TryGetValue(font, out var skFont))
         {

@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Shimakaze.UI.Fonts\Shimakaze.UI.Fonts.csproj" />
     <ProjectReference Include="..\..\src\Shimakaze.UI.Glfw\Shimakaze.UI.Glfw.csproj" />
     <ProjectReference Include="..\..\src\Shimakaze.UI.Input\Shimakaze.UI.Input.csproj" />
     <ProjectReference Include="..\..\src\Shimakaze.UI.Media\Shimakaze.UI.Media.csproj" />

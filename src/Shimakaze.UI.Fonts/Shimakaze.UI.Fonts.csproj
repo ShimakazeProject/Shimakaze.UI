@@ -4,4 +4,8 @@
     <PackageReference Include="SkiaSharp.HarfBuzz" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Shimakaze.UI.Rendering\Shimakaze.UI.Rendering.csproj" />
+  </ItemGroup>
+
 </Project>

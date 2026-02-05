@@ -1,3 +1,5 @@
+using Shimakaze.UI.Rendering;
+
 using SkiaSharp;
 
 sealed record class CursorsFrame
@@ -18,51 +20,66 @@ sealed record class CursorsFrame
     public SKBitmap? UpArrow { get; init; }
     public SKBitmap? Hand { get; init; }
 
-    public void Draw(SKCanvas canvas, ref int x, int y, in int cursorWidth)
+    public void Draw(Renderer renderer, float x, float y, in int cursorWidth)
     {
-        canvas.DrawBitmap(Arrow, x, y);
+        if (Arrow is not null)
+            renderer.DrawBitmap(Arrow, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(Help, x, y);
+        if (Help is not null)
+            renderer.DrawBitmap(Help, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(AppStarting, x, y);
+        if (AppStarting is not null)
+            renderer.DrawBitmap(AppStarting, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(Wait, x, y);
+        if (Wait is not null)
+            renderer.DrawBitmap(Wait, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(Crosshair, x, y);
+        if (Crosshair is not null)
+            renderer.DrawBitmap(Crosshair, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(IBeam, x, y);
+        if (IBeam is not null)
+            renderer.DrawBitmap(IBeam, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(NWPen, x, y);
+        if (NWPen is not null)
+            renderer.DrawBitmap(NWPen, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(No, x, y);
+        if (No is not null)
+            renderer.DrawBitmap(No, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(SizeNS, x, y);
+        if (SizeNS is not null)
+            renderer.DrawBitmap(SizeNS, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(SizeWE, x, y);
+        if (SizeWE is not null)
+            renderer.DrawBitmap(SizeWE, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(SizeNWSE, x, y);
+        if (SizeNWSE is not null)
+            renderer.DrawBitmap(SizeNWSE, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(SizeNESW, x, y);
+        if (SizeNESW is not null)
+            renderer.DrawBitmap(SizeNESW, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(SizeAll, x, y);
+        if (SizeAll is not null)
+            renderer.DrawBitmap(SizeAll, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(UpArrow, x, y);
+        if (UpArrow is not null)
+            renderer.DrawBitmap(UpArrow, x, y);
         x += cursorWidth;
 
-        canvas.DrawBitmap(Hand, x, y);
+        if (Hand is not null)
+            renderer.DrawBitmap(Hand, x, y);
         x += cursorWidth;
     }
 }

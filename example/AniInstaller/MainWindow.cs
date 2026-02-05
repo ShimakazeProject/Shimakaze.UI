@@ -1,18 +1,22 @@
+using System.Drawing;
+
 using Shimakaze.UI.Core;
+using Shimakaze.UI.Fonts;
 using Shimakaze.UI.Input;
 using Shimakaze.UI.Input.EventArgs;
 using Shimakaze.UI.Rendering;
 
 using Silk.NET.Input;
 
-using SkiaSharp;
-using SkiaSharp.HarfBuzz;
-
-sealed class MainWindow(IRendererProvider renderer) : Window
+sealed class MainWindow(IRendererProvider rendererProvider) : Window
 {
+    private const float Degrees = -60;
+    private const double Tick = 1 / 60d;
     private readonly LinkedList<Cursors> _cursors = [];
+    private readonly Font _fontHeader = new("Segoe UI", 12);
+    private readonly Font _fontLeftSide = new("Microsoft YaHei UI", 16);
+    private readonly Font _fontRightSide = new("Segoe UI", 16);
 
-    private readonly double _tick = 1 / 60d;
     private double _total = 0;
 
     private double _offsetY = 0;
@@ -20,25 +24,14 @@ sealed class MainWindow(IRendererProvider renderer) : Window
     private const int StartY = 64;
     private int _cursorWidth = 32;
     private int _cursorHeight = 32;
-    private SKShaper? _shaper;
-    private SKFont? _fontHeader;
-    private SKFont? _font16;
-    private SKPaint? _paint;
-    private float _descent;
+    private float _descentLeft;
+    private float _descentRight;
 
     protected override async void OnInitialize()
     {
         base.OnInitialize();
-        using var typeface = SKTypeface.FromFamilyName("Microsoft YaHei UI");
-        _fontHeader = new(typeface, 12);
-        _font16 = new(typeface, 16);
-        _descent = _font16.Metrics.Descent;
-        _shaper = new(typeface);
-        _paint = new()
-        {
-            Color = SKColors.White,
-            IsAntialias = true,
-        };
+        _descentLeft = FontManager.GetFont(_fontLeftSide).Metrics.Descent;
+        _descentRight = FontManager.GetFont(_fontRightSide).Metrics.Descent;
 
         INativeWindow native = this;
         var size = native.Native.Size;
@@ -110,18 +103,19 @@ sealed class MainWindow(IRendererProvider renderer) : Window
     protected override void OnRender(double time)
     {
         INativeWindow native = this;
-        var surface = renderer.GetSurface(this);
-        surface.Canvas.Clear(SKColors.Black);
+        using var renderer = rendererProvider.GetRenderer(this);
+
+        renderer.Clear(Color.Black);
 
         _total += time;
 
-        int frame = (int)(_total / _tick);
+        int frame = (int)(_total / Tick);
 
-        int y = StartY, x;
+        float y = StartY;
 
         y += (int)(_offsetY * _cursorHeight);
 
-        PrintHeader(surface.Canvas);
+        PrintHeader(renderer);
         var node = _cursors.First;
         while (node is not null)
         {
@@ -135,108 +129,61 @@ sealed class MainWindow(IRendererProvider renderer) : Window
 
             if (draw)
             {
-                x = StartX;
-                var textY = y + (_cursorHeight / 2) + _descent;
-                surface.Canvas.DrawShapedText(
-                    _shaper,
+
+                renderer.DrawText(
                     cursor.Name,
-                    x,
-                    textY,
-                    SKTextAlign.Right,
-                    _font16,
-                    _paint);
+                    StartX,
+                    y + (_cursorHeight / 2) + _descentLeft,
+                    TextAlign.Right,
+                    _fontLeftSide);
 
-                frames.Draw(surface.Canvas, ref x, y, _cursorWidth);
+                frames.Draw(renderer, StartX, y, _cursorWidth);
 
-                surface.Canvas.DrawShapedText(
-                    _shaper,
+                renderer.DrawText(
                     "Apply",
-                    x,
-                    textY,
-                    SKTextAlign.Left,
-                    _font16,
-                    _paint);
+                    StartX + _cursorWidth * 15,
+                    y + (_cursorHeight / 2) + _descentRight,
+                    TextAlign.Left,
+                    _fontRightSide);
             }
 
             y += _cursorHeight;
         }
-
-        surface.Flush();
     }
 
-    private void PrintHeader(SKCanvas canvas)
+    private void PrintHeader(BaseRenderer renderer)
     {
-        const float degrees = 60;
-        float x, y;
-        canvas.Save();
-        canvas.Translate(0, 0);
+        using var rotatedRenderer = renderer.RotateDegrees(Degrees);
 
-        canvas.RotateDegrees(-degrees);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (1 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "Arrow", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (2 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "Help", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (3 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "AppStarting", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (4 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "Wait", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (5 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "Crosshair", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (6 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "IBeam", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (7 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "NWPen", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (8 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "No", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (9 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "SizeNS", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (10 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "SizeWE", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (11 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "SizeNWSE", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (12 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "SizeNESW", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (13 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "SizeAll", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (14 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "UpArrow", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        (x, y) = RotatePointDegrees(StartX + (_cursorWidth * (15 - 1)) + (_cursorWidth / 2), StartY, degrees);
-        canvas.DrawShapedText(_shaper, "Hand", x, y, SKTextAlign.Left, _fontHeader, _paint);
-        canvas.RotateDegrees(degrees);
-    }
-
-    /// <summary>
-    /// 绕原点(0,0)旋转坐标点
-    /// </summary>
-    /// <param name="x">原始X坐标</param>
-    /// <param name="y">原始Y坐标</param>
-    /// <param name="radians">旋转弧度（正值逆时针，负值顺时针）</param>
-    /// <returns>旋转后的坐标(x, y)</returns>
-    public static (float x, float y) RotatePoint(float x, float y, float radians)
-    {
-        // 旋转公式：
-        // x' = x * cos(θ) - y * sin(θ)
-        // y' = x * sin(θ) + y * cos(θ)
-        float cosTheta = (float)Math.Cos(radians);
-        float sinTheta = (float)Math.Sin(radians);
-
-        float newX = x * cosTheta - y * sinTheta;
-        float newY = x * sinTheta + y * cosTheta;
-
-        return (newX, newY);
-    }
-
-    /// <summary>
-    /// 绕原点(0,0)旋转坐标点（使用度数的版本）
-    /// </summary>
-    /// <param name="x">原始X坐标</param>
-    /// <param name="y">原始Y坐标</param>
-    /// <param name="degrees">旋转角度（正值逆时针，负值顺时针）</param>
-    /// <returns>旋转后的坐标(x, y)</returns>
-    public static (float x, float y) RotatePointDegrees(float x, float y, float degrees)
-    {
-        // 将角度转换为弧度：弧度 = 角度 × π / 180
-        float radians = degrees * (float)Math.PI / 180f;
-        return RotatePoint(x, y, radians);
+        float x = StartX + _cursorWidth / 2;
+        rotatedRenderer.DrawText("Arrow", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("Help", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("AppStarting", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("Wait", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("Crosshair", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("IBeam", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("NWPen", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("No", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("SizeNS", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("SizeWE", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("SizeNWSE", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("SizeNESW", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("SizeAll", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("UpArrow", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("Hand", x, StartY, TextAlign.Left, _fontHeader);
     }
 }

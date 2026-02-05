@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-using SkiaSharp;
+using Shimakaze.UI.Rendering;
 
 namespace Shimakaze.UI.Controls;
 
@@ -148,17 +148,14 @@ public abstract partial class Visual : ObservableObject
     /// <returns>元素的期望大小</returns>
     protected virtual SizeF MeasureCore(SizeF availableSize)
     {
-        // 默认实现：使用显式尺寸或可用尺寸，应用约束并考虑边距
+        // 默认实现：使用显式尺寸或可用尺寸，应用约束
         var width = Width ?? availableSize.Width;
         var height = Height ?? availableSize.Height;
 
         var constrainedWidth = GetConstrainedWidth(width);
         var constrainedHeight = GetConstrainedHeight(height);
 
-        return new Size(
-            (int)(constrainedWidth + Margin.Horizontal),
-            (int)(constrainedHeight + Margin.Vertical)
-        );
+        return new(constrainedWidth, constrainedHeight);
     }
 
     /// <summary>
@@ -168,22 +165,21 @@ public abstract partial class Visual : ObservableObject
     public virtual void Arrange(RectangleF finalRect)
     {
         RequiredArrange = false;
-        RenderBounds = finalRect;
-        ArrangeCore(finalRect);
+        RenderBounds = ArrangeCore(finalRect);
     }
 
     /// <summary>
     /// 排列此元素的核心逻辑。
     /// </summary>
     /// <param name="finalRect"></param>
-    protected virtual void ArrangeCore(RectangleF finalRect)
+    protected virtual RectangleF ArrangeCore(RectangleF finalRect)
     {
-        // 默认实现：不需要额外逻辑，RenderBounds 已在 Arrange 中设置
+        return finalRect;
     }
 
     /// <summary>
     /// 渲染此元素。
     /// </summary>
-    /// <param name="canvas"></param>
-    public abstract void Render(SKCanvas canvas);
+    /// <param name="renderer"></param>
+    public abstract void Render(Renderer renderer);
 }

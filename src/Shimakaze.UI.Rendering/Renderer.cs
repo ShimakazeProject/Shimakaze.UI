@@ -38,6 +38,21 @@ public abstract class Renderer(SKSurface surface) : IDisposable
         return this;
     }
 
+    #region Image
+    public Renderer DrawImage(SKImage image, PointF point, SKPaint? paint = default)
+    {
+        point = FixPosition(point);
+        Canvas.DrawImage(image, point.ToSkia(), paint);
+        return this;
+    }
+    public Renderer DrawImage(SKImage image, RectangleF rect, SKPaint? paint = default)
+    {
+        rect = FixPosition(rect);
+        Canvas.DrawImage(image, rect.ToSkia(), paint);
+        return this;
+    }
+    #endregion
+
     #region Bitmap
     public Renderer DrawBitmap(SKBitmap bitmap, PointF point, SKPaint? paint = default)
     {

@@ -13,9 +13,9 @@ sealed class MainWindow : Window
     private const float Degrees = -60;
     private const double Tick = 1 / 60d;
     private readonly LinkedList<Cursors> _cursors = [];
-    private readonly Font _fontHeader = new("Segoe UI", 12);
-    private readonly Font _fontLeftSide = new("Microsoft YaHei UI", 16);
-    private readonly Font _fontRightSide = new("Segoe UI", 16);
+    private readonly Font _fontHeader = Font.FromFamilyName("Segoe UI", 12);
+    private readonly Font _fontLeftSide = Font.FromFamilyName("Microsoft YaHei UI", 16);
+    private readonly Font _fontRightSide = Font.FromFamilyName("Segoe UI", 16);
 
     private double _total = 0;
 

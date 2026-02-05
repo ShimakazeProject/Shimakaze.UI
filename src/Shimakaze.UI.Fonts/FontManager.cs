@@ -35,8 +35,13 @@ public static class FontManager
 
         if (!Typefaces.TryGetValue(font, out var typeface))
         {
-            Typefaces[font] = typeface = SKTypeface.FromFamilyName(font.FamilyName, fontStyle);
-
+            Typefaces[font] = typeface = font switch
+            {
+                FamilyNameFont familyNameFont => SKTypeface.FromFamilyName(familyNameFont.FamilyName, fontStyle),
+                FilePathFont filePathFont => SKTypeface.FromFile(filePathFont.FilePath, filePathFont.Index),
+                StreamFont streamFont => SKTypeface.FromStream(streamFont.Stream, streamFont.Index),
+                _ => throw new NotSupportedException(),
+            };
             font.Disposed += () => Typefaces.Remove(font);
         }
 

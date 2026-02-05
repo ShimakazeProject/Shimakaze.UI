@@ -1,6 +1,4 @@
-using System.Drawing;
-
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Drawing;
 
 using SkiaSharp;
 
@@ -29,49 +27,49 @@ public abstract partial class Visual : ObservableObject
     /// 此元素的期望大小。
     /// </summary>
     [ObservableProperty]
-    public partial Size DesiredSize { get; private set; }
+    public partial SizeF DesiredSize { get; private set; }
 
     /// <summary>
     /// 此元素在 Arrange 后的实际渲染边界。
     /// </summary>
     [ObservableProperty]
-    public partial Rectangle RenderBounds { get; private set; }
+    public partial RectangleF RenderBounds { get; private set; }
 
     /// <summary>
     /// 元素的宽度。
     /// </summary>
     [ObservableProperty]
-    public partial double? Width { get; set; }
+    public partial float? Width { get; set; }
 
     /// <summary>
     /// 元素的高度。
     /// </summary>
     [ObservableProperty]
-    public partial double? Height { get; set; }
+    public partial float? Height { get; set; }
 
     /// <summary>
     /// 元素的最小宽度。
     /// </summary>
     [ObservableProperty]
-    public partial double MinWidth { get; set; }
+    public partial float MinWidth { get; set; }
 
     /// <summary>
     /// 元素的最大宽度。
     /// </summary>
     [ObservableProperty]
-    public partial double MaxWidth { get; set; } = double.PositiveInfinity;
+    public partial float MaxWidth { get; set; } = float.PositiveInfinity;
 
     /// <summary>
     /// 元素的最小高度。
     /// </summary>
     [ObservableProperty]
-    public partial double MinHeight { get; set; }
+    public partial float MinHeight { get; set; }
 
     /// <summary>
     /// 元素的最大高度。
     /// </summary>
     [ObservableProperty]
-    public partial double MaxHeight { get; set; } = double.PositiveInfinity;
+    public partial float MaxHeight { get; set; } = float.PositiveInfinity;
 
     /// <summary>
     /// 元素的外边距。
@@ -106,7 +104,7 @@ public abstract partial class Visual : ObservableObject
     /// <summary>
     /// 获取考虑 Width、MinWidth、MaxWidth 约束后的宽度。
     /// </summary>
-    protected double GetConstrainedWidth(double width)
+    protected float GetConstrainedWidth(float width)
     {
         var w = Width ?? width;
         return Math.Max(MinWidth, Math.Min(MaxWidth, w));
@@ -115,7 +113,7 @@ public abstract partial class Visual : ObservableObject
     /// <summary>
     /// 获取考虑 Height、MinHeight、MaxHeight 约束后的高度。
     /// </summary>
-    protected double GetConstrainedHeight(double height)
+    protected float GetConstrainedHeight(float height)
     {
         var h = Height ?? height;
         return Math.Max(MinHeight, Math.Min(MaxHeight, h));
@@ -125,7 +123,7 @@ public abstract partial class Visual : ObservableObject
     /// 测量此元素。
     /// </summary>
     /// <param name="availableSize"></param>
-    public virtual void Measure(Size availableSize)
+    public virtual void Measure(SizeF availableSize)
     {
         RequiredMeasure = false;
         DesiredSize = MeasureCore(availableSize);
@@ -136,7 +134,7 @@ public abstract partial class Visual : ObservableObject
     /// </summary>
     /// <param name="availableSize"></param>
     /// <returns>元素的期望大小</returns>
-    protected virtual Size MeasureCore(Size availableSize)
+    protected virtual SizeF MeasureCore(SizeF availableSize)
     {
         // 默认实现：使用显式尺寸或可用尺寸，应用约束并考虑边距
         var width = Width ?? availableSize.Width;
@@ -155,7 +153,7 @@ public abstract partial class Visual : ObservableObject
     /// 排列此元素。
     /// </summary>
     /// <param name="finalRect"></param>
-    public virtual void Arrange(Rectangle finalRect)
+    public virtual void Arrange(RectangleF finalRect)
     {
         RequiredArrange = false;
         RenderBounds = finalRect;
@@ -166,7 +164,7 @@ public abstract partial class Visual : ObservableObject
     /// 排列此元素的核心逻辑。
     /// </summary>
     /// <param name="finalRect"></param>
-    protected virtual void ArrangeCore(Rectangle finalRect)
+    protected virtual void ArrangeCore(RectangleF finalRect)
     {
         // 默认实现：不需要额外逻辑，RenderBounds 已在 Arrange 中设置
     }

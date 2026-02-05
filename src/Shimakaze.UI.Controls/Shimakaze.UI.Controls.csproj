@@ -5,11 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\analyzer\Shimakaze.UI.MVVM.SourceGenerator\Shimakaze.UI.MVVM.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
+    <ProjectReference Include="..\Shimakaze.UI.Fonts\Shimakaze.UI.Fonts.csproj" />
+    <ProjectReference Include="..\Shimakaze.UI.Input\Shimakaze.UI.Input.csproj" />
     <ProjectReference Include="..\Shimakaze.UI.Rendering\Shimakaze.UI.Rendering.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-<PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="SkiaSharp.HarfBuzz" />
   </ItemGroup>
 

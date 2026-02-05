@@ -8,7 +8,7 @@ using Shimakaze.UI.Rendering;
 
 using Silk.NET.Input;
 
-sealed class MainWindow(IRendererProvider rendererProvider) : Window
+sealed class MainWindow : Window
 {
     private const float Degrees = -60;
     private const double Tick = 1 / 60d;
@@ -103,7 +103,7 @@ sealed class MainWindow(IRendererProvider rendererProvider) : Window
     protected override void OnRender(double time)
     {
         INativeWindow native = this;
-        using var renderer = rendererProvider.GetRenderer(this);
+        using var renderer = Application.GetRenderer(this);
 
         renderer.Clear(Color.Black);
 

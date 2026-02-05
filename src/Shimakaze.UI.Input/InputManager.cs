@@ -1,8 +1,4 @@
-﻿
-using System.Collections.Concurrent;
-using System.Numerics;
-
-using Microsoft.Extensions.DependencyInjection;
+﻿using System.Numerics;
 
 using Shimakaze.UI.Core;
 using Shimakaze.UI.Input.EventArgs;
@@ -11,10 +7,8 @@ using Silk.NET.Input;
 
 namespace Shimakaze.UI.Input;
 
-public sealed class InputManager(IInputContextProvider inputContextProvider) : IDisposable
+public sealed class InputManager : IDisposable
 {
-    private static readonly ConcurrentDictionary<Window, InputManager> InputManagers = [];
-
     private IInputContext? _inputContext;
     private bool _disposedValue;
 
@@ -40,32 +34,25 @@ public sealed class InputManager(IInputContextProvider inputContextProvider) : I
     public event UIEventHandler<InputManager, KeyboardKeyEventArgs>? KeyboardKeyDown;
     public event UIEventHandler<InputManager, KeyboardKeyEventArgs>? KeyboardKeyUp;
 
-    public Window Window { get; private set; } = default!;
+    public Window Window { get; }
 
-    public static InputManager Get(Window window)
-        => InputManagers.GetOrAdd(window, CreateInputManager);
-
-    private static InputManager CreateInputManager(Window window)
+    internal InputManager(IInputContextProvider inputContextProvider, Window window)
     {
-        var inputManager = Application.Instance.Services.GetRequiredService<InputManager>();
-        inputManager.Window = window;
+        Window = window;
 
         if (window.IsInitialized)
-            inputManager.Initialize(window, System.EventArgs.Empty);
+            Initialize(inputContextProvider)(window, System.EventArgs.Empty);
         else
-            window.Initialize += inputManager.Initialize;
-        window.Closed += (_, _) => InputManagers.Remove(window, out _);
-
-        return inputManager;
+            window.Initialize += Initialize(inputContextProvider);
     }
 
-    private void Initialize(INativeWindow window, System.EventArgs eventArgs)
+    private UIEventHandler<Window> Initialize(IInputContextProvider inputContextProvider) => (window, eventArgs) =>
     {
-        _inputContext = inputContextProvider.CreateInputContext(window.Native);
+        _inputContext = inputContextProvider.CreateInputContext(((INativeWindow)window).Native);
         _inputContext.ConnectionChanged += OnInputDeviceConnectionChanged;
         foreach (var device in _inputContext.Devices)
             InitializeInputDevice(device, device.IsConnected);
-    }
+    };
 
     private void InitializeInputDevice(IInputDevice device, bool connected)
     {

@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using Shimakaze.UI.Core;
-using Shimakaze.UI.Rendering;
 using Shimakaze.UI.Rendering.Extensions;
 
 var builder = Host.CreateShimakazeUIApplicationBuilder(args);
@@ -16,13 +15,13 @@ var app = builder.Build();
 
 await app.RunAsync();
 
-sealed class MainWindow(IRendererProvider rendererProvider) : Window
+sealed class MainWindow : Window
 {
     private int _h;
 
     protected override void OnRender(double time)
     {
-        using var renderer = rendererProvider.GetRenderer(this);
+        using var renderer = Application.GetRenderer(this);
 
         renderer.Clear(Color.FromHsv(_h, 100, 100));
         _h++;

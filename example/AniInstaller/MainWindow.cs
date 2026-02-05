@@ -8,7 +8,7 @@ using Silk.NET.Input;
 using SkiaSharp;
 using SkiaSharp.HarfBuzz;
 
-sealed class MainWindow(IRenderer renderer) : Window
+sealed class MainWindow(IRendererProvider renderer) : Window
 {
     private readonly LinkedList<Cursors> _cursors = [];
 

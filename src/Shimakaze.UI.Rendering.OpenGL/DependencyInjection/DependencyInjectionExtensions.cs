@@ -11,7 +11,7 @@ public static class DependencyInjectionExtensions
         .UseOpenGLRenderer();
 
     public static IServiceCollection UseOpenGLRenderer(this IServiceCollection services)
-        => services.UseRenderer<OpenGLRenderer>();
+        => services.UseRendererProvider<OpenGLRendererProvider>();
 
     public static IServiceCollection UseOpenGLWindowOptionsProvider(this IServiceCollection services)
         => services.UseWindowOptionsProvider<OpenGLWindowOptionsProvider>();

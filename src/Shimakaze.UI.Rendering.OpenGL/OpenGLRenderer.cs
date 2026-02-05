@@ -6,7 +6,7 @@ using SkiaSharp;
 
 namespace Shimakaze.UI.Rendering.OpenGL;
 
-public sealed class OpenGLRenderer : Renderer
+public sealed class OpenGLRendererProvider : RendererProvider
 {
     private readonly ConcurrentDictionary<IWindow, OpenGLRendererContext> _cache = [];
     private GRContext? _grContext;

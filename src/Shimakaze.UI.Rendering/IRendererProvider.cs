@@ -4,7 +4,7 @@ using SkiaSharp;
 
 namespace Shimakaze.UI.Rendering;
 
-public interface IRenderer
+public interface IRendererProvider
 {
     SKSurface GetSurface(INativeWindow window);
 }

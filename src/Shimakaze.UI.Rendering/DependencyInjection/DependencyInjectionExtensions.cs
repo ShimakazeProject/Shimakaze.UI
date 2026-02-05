@@ -11,23 +11,23 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DependencyInjectionExtensions
 {
-    public static IServiceCollection UseRenderer
-        <[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TRenderer>(
+    public static IServiceCollection UseRendererProvider
+        <[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TRendererProvider>(
         this IServiceCollection services)
-        where TRenderer : class, IRenderer
+        where TRendererProvider : class, IRendererProvider
     {
-        services.TryAddSingleton<TRenderer>();
-        if (typeof(TRenderer).IsAssignableTo(typeof(Renderer)))
+        services.TryAddSingleton<TRendererProvider>();
+        if (typeof(TRendererProvider).IsAssignableTo(typeof(RendererProvider)))
         {
-            services.TryAddSingleton<Renderer>(provider =>
+            services.TryAddSingleton<RendererProvider>(provider =>
             {
-                var result = provider.GetRequiredService<TRenderer>() as Renderer;
+                var result = provider.GetRequiredService<TRendererProvider>() as RendererProvider;
                 Debug.Assert(result is not null);
                 return result;
             });
         }
 
-        services.TryAddSingleton<IRenderer>(provider => provider.GetRequiredService<TRenderer>());
+        services.TryAddSingleton<IRendererProvider>(provider => provider.GetRequiredService<TRendererProvider>());
         return services;
     }
 }

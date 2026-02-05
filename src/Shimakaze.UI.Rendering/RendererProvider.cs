@@ -6,7 +6,7 @@ using SkiaSharp;
 
 namespace Shimakaze.UI.Rendering;
 
-public abstract class Renderer : IRenderer
+public abstract class RendererProvider : IRendererProvider
 {
     public SKSurface GetSurface(INativeWindow window)
         => GetSurface(window.Native);

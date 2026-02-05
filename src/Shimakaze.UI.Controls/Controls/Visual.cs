@@ -12,6 +12,18 @@ public abstract partial class Visual : ObservableObject
     public Visual? Parent { get; internal set; }
 
     /// <summary>
+    /// 是否可见。
+    /// </summary>
+    [ObservableProperty]
+    public partial Visiblity Visiblity { get; set; } = Visiblity.Visible;
+
+    /// <summary>
+    /// 透明度（0-1）。
+    /// </summary>
+    [ObservableProperty]
+    public partial float Opacity { get; set; } = 1.0f;
+
+    /// <summary>
     /// 是否需要重新测量。
     /// </summary>
     [ObservableProperty]

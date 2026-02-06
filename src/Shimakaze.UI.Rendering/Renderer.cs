@@ -45,10 +45,21 @@ public abstract class Renderer(SKSurface surface) : IDisposable
         Canvas.DrawImage(image, point.ToSkia(), paint);
         return this;
     }
-    public Renderer DrawImage(SKImage image, RectangleF rect, SKPaint? paint = default)
+
+    public Renderer DrawImage(SKImage image, SizeF source, RectangleF dest, SKPaint? paint = default)
+        => DrawImage(image, new RectangleF(PointF.Empty, source), dest, paint);
+
+    public Renderer DrawImage(SKImage image, RectangleF dist, SKPaint? paint = default)
     {
-        rect = FixPosition(rect);
-        Canvas.DrawImage(image, rect.ToSkia(), paint);
+        dist = FixPosition(dist);
+        Canvas.DrawImage(image, dist.ToSkia(), paint);
+        return this;
+    }
+
+    public Renderer DrawImage(SKImage image, RectangleF source, RectangleF dest, SKPaint? paint = default)
+    {
+        dest = FixPosition(dest);
+        Canvas.DrawImage(image, source.ToSkia(), dest.ToSkia(), paint);
         return this;
     }
     #endregion

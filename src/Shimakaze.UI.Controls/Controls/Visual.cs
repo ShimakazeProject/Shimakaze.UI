@@ -181,5 +181,5 @@ public abstract partial class Visual : BindableObject
     /// 渲染此元素。
     /// </summary>
     /// <param name="renderer"></param>
-    public abstract void Render(Renderer renderer);
+    public abstract void OnRender(Renderer renderer);
 }

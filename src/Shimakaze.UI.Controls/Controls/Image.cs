@@ -23,7 +23,7 @@ public partial class Image : UIElement
         return new(constrainedWidth, constrainedHeight);
     }
 
-    public override void Render(Renderer renderer)
+    public override void OnRender(Renderer renderer)
     {
         if (Source is null)
             return;

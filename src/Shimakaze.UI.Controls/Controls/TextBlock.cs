@@ -1,12 +1,8 @@
 using System.Drawing;
 
 
-using Shimakaze.UI.Controls.Inlines;
 using Shimakaze.UI.Fonts;
 using Shimakaze.UI.Rendering;
-using Shimakaze.UI.Rendering.Extensions;
-
-using SkiaSharp;
 
 namespace Shimakaze.UI.Controls;
 
@@ -39,7 +35,7 @@ public partial class TextBlock : UIElement
         return new(constrainedWidth, constrainedHeight);
     }
 
-    public override void Render(Renderer renderer)
+    public override void OnRender(Renderer renderer)
     {
         if (Text is null)
             return;

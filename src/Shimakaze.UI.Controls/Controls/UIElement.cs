@@ -1,6 +1,5 @@
 using System.Drawing;
 
-using Shimakaze.UI.Bindings;
 using Shimakaze.UI.Core;
 using Shimakaze.UI.Input.EventArgs;
 

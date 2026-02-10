@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Numerics;
 
 using Shimakaze.UI.Rendering.Extensions;
@@ -49,10 +49,10 @@ public abstract class Renderer(SKSurface surface) : IDisposable
     public Renderer DrawImage(SKImage image, SizeF source, RectangleF dest, SKPaint? paint = default)
         => DrawImage(image, new RectangleF(PointF.Empty, source), dest, paint);
 
-    public Renderer DrawImage(SKImage image, RectangleF dist, SKPaint? paint = default)
+    public Renderer DrawImage(SKImage image, RectangleF dest, SKPaint? paint = default)
     {
-        dist = FixPosition(dist);
-        Canvas.DrawImage(image, dist.ToSkia(), paint);
+        dest = FixPosition(dest);
+        Canvas.DrawImage(image, dest.ToSkia(), paint);
         return this;
     }
 
@@ -74,14 +74,22 @@ public abstract class Renderer(SKSurface surface) : IDisposable
     public Renderer DrawBitmap(SKBitmap bitmap, float x, float y, SKPaint? paint = default)
          => DrawBitmap(bitmap, new PointF(x, y), paint);
 
-    public Renderer DrawBitmap(SKBitmap bitmap, RectangleF rect, SKPaint? paint = default)
+    public Renderer DrawBitmap(SKBitmap bitmap, RectangleF dest, SKPaint? paint = default)
     {
-        rect = FixPosition(rect);
-        Canvas.DrawBitmap(bitmap, rect.ToSkia(), paint);
+        dest = FixPosition(dest);
+        Canvas.DrawBitmap(bitmap, dest.ToSkia(), paint);
         return this;
     }
+
     public Renderer DrawBitmap(SKBitmap bitmap, float x, float y, float width, float height, SKPaint? paint = default)
         => DrawBitmap(bitmap, new RectangleF(x, y, width, height), paint);
+
+    public Renderer DrawBitmap(SKBitmap bitmap, RectangleF source, RectangleF dest, SKPaint? paint = default)
+    {
+        dest = FixPosition(dest);
+        Canvas.DrawBitmap(bitmap, source.ToSkia(), dest.ToSkia(), paint);
+        return this;
+    }
     #endregion
 
     #region Rotate
@@ -98,6 +106,8 @@ public abstract class Renderer(SKSurface surface) : IDisposable
     public RotatedRenderer RotateRadians(float x, float y, float radians)
         => RotateRadians(new(x, y), radians);
     #endregion
+
+    public ClippedRenderer ClipRect(RectangleF rect) => new(this, rect);
 
     public abstract void Dispose();
 }

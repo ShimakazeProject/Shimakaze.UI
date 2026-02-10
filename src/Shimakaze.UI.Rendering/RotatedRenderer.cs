@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Numerics;
 
 using Shimakaze.UI.Rendering.Extensions;
@@ -65,5 +65,6 @@ public sealed class RotatedRenderer : Renderer, IDisposable
     {
         Canvas.RotateRadians(-Radians);
         Canvas.Translate(-Origin.X, -Origin.Y);
+        Canvas.Restore();
     }
 }

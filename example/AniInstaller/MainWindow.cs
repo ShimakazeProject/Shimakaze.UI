@@ -1,15 +1,20 @@
-using System.Drawing;
+﻿using System.Drawing;
 
 using Shimakaze.UI.Core;
 using Shimakaze.UI.Fonts;
 using Shimakaze.UI.Input;
 using Shimakaze.UI.Input.EventArgs;
 using Shimakaze.UI.Rendering;
+using Shimakaze.UI.Rendering.Extensions;
 
 using Silk.NET.Input;
 
+using SkiaSharp;
+
 sealed class MainWindow : Window
 {
+    private const float DAMPING = 8.0f;  // 阻尼系数（单位：1/秒），典型值 6~12
+
     private const float Degrees = -60;
     private const double Tick = 1 / 60d;
     private readonly LinkedList<Cursors> _cursors = [];
@@ -19,13 +24,24 @@ sealed class MainWindow : Window
 
     private double _total = 0;
 
-    private double _offsetY = 0;
     private const int StartX = 120;
     private const int StartY = 64;
     private int _cursorWidth = 32;
     private int _cursorHeight = 32;
     private float _descentLeft;
     private float _descentRight;
+
+    private float _currentY = 0;
+    private float _targetY = 0;
+
+    private int _focus = 0;
+    private float _currentFocusY = 0;
+    private float _targetFocusY = 0;
+    private readonly SKPaint _focusPaint = new()
+    {
+        Color = Color.FromArgb(0x7F808080).ToSkia(),
+    };
+
 
     protected override async void OnInitialize()
     {
@@ -43,6 +59,7 @@ sealed class MainWindow : Window
 
         this.Input.MouseScroll += Scroll;
         this.Input.MouseClick += Click;
+        this.Input.KeyboardKeyDown += KeyDown;
 
         await Task.Run(async () =>
         {
@@ -59,6 +76,28 @@ sealed class MainWindow : Window
         }).ConfigureAwait(false);
     }
 
+    private void KeyDown(InputManager sender, KeyboardKeyEventArgs eventArgs)
+    {
+        switch (eventArgs.Key)
+        {
+            case Key.Home:
+                _focus = 0;
+                break;
+            case Key.End:
+                _focus = int.MaxValue;
+                break;
+            case Key.Up:
+                _focus--;
+                break;
+            case Key.Down:
+                _focus++;
+                break;
+        }
+
+        _focus = int.Clamp(_focus, 0, _cursors.Count - 1);
+        Focus();
+    }
+
     private void Click(InputManager sender, MouseClickEventArgs eventArgs)
     {
         if (eventArgs.Button is not MouseButton.Left)
@@ -69,8 +108,7 @@ sealed class MainWindow : Window
             return;
 
         // var y = eventArgs.Position.Y;
-        int y = StartY;
-        y += (int)(_offsetY * _cursorHeight);
+        float y = StartY + _currentY;
 
         foreach (var cursor in _cursors)
         {
@@ -90,14 +128,49 @@ sealed class MainWindow : Window
                 y += _cursorHeight;
             }
         }
-
     }
 
     private void Scroll(InputManager sender, MouseScrollEventArgs eventArgs)
     {
-        _offsetY += eventArgs.Wheel.Y;
-        _offsetY = Math.Min(_offsetY, 0);
-        _offsetY = Math.Max(_offsetY, -_cursors.Count + 1);
+        _targetY += eventArgs.Wheel.Y * _cursorHeight;
+        _targetY = float.Clamp(_targetY, -(_cursors.Count - 1) * _cursorHeight, 0);
+    }
+
+    private void Focus()
+    {
+        INativeWindow native = this;
+        var height = native.Native.Size.Y;
+        height -= StartY;
+
+        _targetFocusY = _focus * _cursorHeight;
+
+        _targetY = _targetFocusY - (height - _cursorHeight) / 2;
+        _targetY = -_targetY;
+        _targetY = float.Clamp(_targetY, -(_cursors.Count - 1) * _cursorHeight, 0);
+    }
+
+    protected override void OnUpdate(double deltaTime)
+    {
+        base.OnUpdate(deltaTime);
+
+        float dt = (float)deltaTime;
+
+        CalcTargetY(dt, ref _currentY, _targetY);
+        CalcTargetY(dt, ref _currentFocusY, _targetFocusY);
+    }
+
+    private void CalcTargetY(float deltaTime, ref float current, float target)
+    {
+        if (float.Abs(target - current) <= 0.1f)
+        {
+            current = target; // 对齐，避免抖动
+            return;
+        }
+
+        // 指数趋近公式（一阶低通滤波器 / 阻尼运动）
+        float t = 1.0f - float.Exp(-DAMPING * deltaTime);
+        current += (target - current) * t;
+
     }
 
     protected override void OnRender(double time)
@@ -111,11 +184,17 @@ sealed class MainWindow : Window
 
         int frame = (int)(_total / Tick);
 
-        float y = StartY;
-
-        y += (int)(_offsetY * _cursorHeight);
+        float y = StartY + _currentY;
 
         PrintHeader(renderer);
+
+        using var clip = renderer.ClipRect(RectangleF.FromLTRB(0, StartY, native.Native.Size.X, native.Native.Size.Y));
+
+
+        renderer.Canvas.DrawRect(
+            new RectangleF(0, StartY + _currentFocusY + _currentY, native.Native.Size.X, _cursorHeight).ToSkia(),
+            _focusPaint);
+
         var node = _cursors.First;
         while (node is not null)
         {
@@ -123,13 +202,12 @@ sealed class MainWindow : Window
             node = node.Next;
 
             var frames = cursor.GetFrame(frame);
-            var draw = y >= StartY;
+            var draw = y > StartY - _cursorHeight;
             if (y > native.Native.Size.Y)
                 break;
 
             if (draw)
             {
-
                 renderer.DrawText(
                     cursor.Name,
                     StartX,

@@ -1,3 +1,4 @@
+﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;
@@ -382,11 +383,18 @@ sealed record class Cursors(string Name)
                 UseShellExecute = true,
             }
         };
-        proc.Start();
-        proc.WaitForExit();
+        try
+        {
+            proc.Start();
+            proc.WaitForExit();
 
-        if (OperatingSystem.IsWindowsVersionAtLeast(5))
-            PInvoke.SystemParametersInfo(SYSTEM_PARAMETERS_INFO_ACTION.SPI_SETCURSORS, 0, SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS.SPIF_UPDATEINIFILE | SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS.SPIF_SENDCHANGE);
+            if (OperatingSystem.IsWindowsVersionAtLeast(5))
+                PInvoke.SystemParametersInfo(SYSTEM_PARAMETERS_INFO_ACTION.SPI_SETCURSORS, 0, SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS.SPIF_UPDATEINIFILE | SYSTEM_PARAMETERS_INFO_UPDATE_FLAGS.SPIF_SENDCHANGE);
+        }
+        catch (Win32Exception)
+        {
+            // 用户取消 UAC
+        }
 
         Directory.Delete(target, true);
     }

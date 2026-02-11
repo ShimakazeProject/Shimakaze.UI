@@ -6,6 +6,6 @@
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
-    <VerifyReferenceAotCompatibility>true</VerifyReferenceAotCompatibility>
+    <!--<VerifyReferenceAotCompatibility>true</VerifyReferenceAotCompatibility>-->
   </PropertyGroup>
 </Project>

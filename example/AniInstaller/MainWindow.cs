@@ -11,7 +11,7 @@ using Silk.NET.Input;
 
 using SkiaSharp;
 
-sealed class MainWindow : Window
+sealed class MainWindow : PlatformWindow
 {
     private const float DAMPING = 8.0f;  // 阻尼系数（单位：1/秒），典型值 6~12
 
@@ -49,12 +49,11 @@ sealed class MainWindow : Window
         _descentLeft = FontManager.GetFont(_fontLeftSide).Metrics.Descent;
         _descentRight = FontManager.GetFont(_fontRightSide).Metrics.Descent;
 
-        INativeWindow native = this;
-        var size = native.Native.Size;
+        var size = Native.Size;
         size.X = 720;
-        native.Native.Size = size;
+        Native.Size = size;
 
-        var height = native.Native.Size.Y - StartY;
+        var height = Size.Height - StartY;
         var count = height / _cursorWidth + 1;
 
         this.Input.MouseScroll += Scroll;
@@ -138,8 +137,7 @@ sealed class MainWindow : Window
 
     private void Focus()
     {
-        INativeWindow native = this;
-        var height = native.Native.Size.Y;
+        var height = Size.Height;
         height -= StartY;
 
         _targetFocusY = _focus * _cursorHeight;
@@ -177,7 +175,6 @@ sealed class MainWindow : Window
     {
         base.OnRender(time);
 
-        INativeWindow native = this;
         using var renderer = Application.GetRenderer(this);
 
         renderer.Clear(Color.Black);
@@ -190,11 +187,11 @@ sealed class MainWindow : Window
 
         PrintHeader(renderer);
 
-        using var clip = renderer.ClipRect(RectangleF.FromLTRB(0, StartY, native.Native.Size.X, native.Native.Size.Y));
+        using var clip = renderer.ClipRect(RectangleF.FromLTRB(0, StartY, Size.Width, Size.Height));
 
 
         renderer.Canvas.DrawRect(
-            new RectangleF(0, StartY + _currentFocusY + _currentY, native.Native.Size.X, _cursorHeight).ToSkia(),
+            new RectangleF(0, StartY + _currentFocusY + _currentY, Size.Width, _cursorHeight).ToSkia(),
             _focusPaint);
 
         var node = _cursors.First;
@@ -205,7 +202,7 @@ sealed class MainWindow : Window
 
             var frames = cursor.GetFrame(frame);
             var draw = y > StartY - _cursorHeight;
-            if (y > native.Native.Size.Y)
+            if (y > Size.Height)
                 break;
 
             if (draw)

@@ -9,6 +9,6 @@ public interface IInputContextProvider
 {
     IInputContext CreateInputContext(IWindow window);
 
-    InputManager CreateInputManager(Core.Window window)
+    InputManager CreateInputManager(Core.PlatformWindow window)
         => CoreExtensions.GetInputManager(this, window);
 }

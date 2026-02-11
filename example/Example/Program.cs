@@ -15,7 +15,7 @@ var app = builder.Build();
 
 await app.RunAsync();
 
-sealed class MainWindow : Window
+sealed class MainWindow : PlatformWindow
 {
     private int _h;
 

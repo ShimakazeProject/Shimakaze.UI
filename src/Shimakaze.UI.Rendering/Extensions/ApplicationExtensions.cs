@@ -13,7 +13,7 @@ public static class ApplicationExtensions
         public IRendererProvider RendererProvider
             => application.Services.GetRequiredService<IRendererProvider>();
 
-        public static BaseRenderer GetRenderer(Window window)
+        public static BaseRenderer GetRenderer(PlatformWindow window)
             => Application.Instance.RendererProvider.GetRenderer(window);
     }
 }

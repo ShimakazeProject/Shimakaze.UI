@@ -3,7 +3,7 @@ using Silk.NET.Windowing;
 
 namespace Shimakaze.UI.Core;
 
-public interface IWindowOptionsProvider
+public interface PlatformWindowOptionsProvider
 {
     WindowOptions CreateOptions();
 }

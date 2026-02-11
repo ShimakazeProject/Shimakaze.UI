@@ -1,47 +1,53 @@
 using System.ComponentModel;
+using System.Drawing;
 
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
 
 namespace Shimakaze.UI.Core;
 
-public partial class Window : INativeWindow
+public partial class PlatformWindow
 {
-    private readonly IWindow _native;
-    IWindow INativeWindow.Native => _native;
+    public readonly IWindow Native;
 
     private bool _disposedValue;
 
-    public event UIEventHandler<Window, WindowMoveEventArgs>? Move;
-    public event UIEventHandler<Window, WindowStateChangedEventArgs>? StateChanged;
-    public event UIEventHandler<Window, WindowFocusChangedEventArgs>? FocusChanged;
-
-    public event UIEventHandler<Window, WindowResizeEventArgs>? Resize;
-    public event UIEventHandler<Window, WindowResizeEventArgs>? FramebufferResize;
-
-    public event UIEventHandler<Window>? Initialize;
-    public event UIEventHandler<Window, WindowUpdateEventArgs>? Update;
-    public event UIEventHandler<Window, WindowUpdateEventArgs>? Render;
-    public event UIEventHandler<Window, CancelEventArgs>? Closing;
-    public event UIEventHandler<Window>? Closed;
-
-    public event UIEventHandler<Window, FileDropEventArgs>? FileDrop;
-
-    public bool IsInitialized => _native.IsInitialized;
-
-    public Window()
+    public virtual SizeF Size
     {
-        _native = Application.Instance.CreateNativeWindow();
-        _native.Move += OnMove;
-        _native.StateChanged += OnStateChanged;
-        _native.FileDrop += OnFileDrop;
-        _native.Resize += OnResize;
-        _native.FramebufferResize += OnFramebufferResize;
-        _native.Closing += () => OnClosing(false);
-        _native.FocusChanged += OnFocusChanged;
-        _native.Load += OnInitialize;
-        _native.Update += OnUpdate;
-        _native.Render += OnRender;
+        get => new(Native.Size.X, Native.Size.Y);
+        set => Native.Size = new((int)value.Width, (int)value.Height);
+    }
+
+    public event UIEventHandler<PlatformWindow, WindowMoveEventArgs>? Move;
+    public event UIEventHandler<PlatformWindow, WindowStateChangedEventArgs>? StateChanged;
+    public event UIEventHandler<PlatformWindow, WindowFocusChangedEventArgs>? FocusChanged;
+
+    public event UIEventHandler<PlatformWindow, WindowResizeEventArgs>? Resize;
+    public event UIEventHandler<PlatformWindow, WindowResizeEventArgs>? FramebufferResize;
+
+    public event UIEventHandler<PlatformWindow>? Initialize;
+    public event UIEventHandler<PlatformWindow, WindowUpdateEventArgs>? Update;
+    public event UIEventHandler<PlatformWindow, WindowUpdateEventArgs>? Render;
+    public event UIEventHandler<PlatformWindow, CancelEventArgs>? Closing;
+    public event UIEventHandler<PlatformWindow>? Closed;
+
+    public event UIEventHandler<PlatformWindow, FileDropEventArgs>? FileDrop;
+
+    public bool IsInitialized => Native.IsInitialized;
+
+    public PlatformWindow()
+    {
+        Native = Application.Instance.CreateNativeWindow();
+        Native.Move += OnMove;
+        Native.StateChanged += OnStateChanged;
+        Native.FileDrop += OnFileDrop;
+        Native.Resize += OnResize;
+        Native.FramebufferResize += OnFramebufferResize;
+        Native.Closing += () => OnClosing(false);
+        Native.FocusChanged += OnFocusChanged;
+        Native.Load += OnInitialize;
+        Native.Update += OnUpdate;
+        Native.Render += OnRender;
         Application.Instance.WindowManager.Register(this);
     }
 
@@ -90,9 +96,9 @@ public partial class Window : INativeWindow
         CancelEventArgs cancelEventArgs = new(cancel);
         Closing?.Invoke(this, cancelEventArgs);
         if (cancelEventArgs.Cancel)
-            _native.IsClosing = false;
+            Native.IsClosing = false;
 
-        if (_native.IsClosing)
+        if (Native.IsClosing)
             Closed?.Invoke(this, EventArgs.Empty);
     }
 
@@ -108,7 +114,7 @@ public partial class Window : INativeWindow
 
         if (disposing)
         {
-            _native.Dispose();
+            Native.Dispose();
         }
 
         _disposedValue = true;

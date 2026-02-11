@@ -4,7 +4,7 @@ using Silk.NET.Windowing;
 
 namespace Shimakaze.UI.Rendering.OpenGL;
 
-public sealed class OpenGLWindowOptionsProvider : IWindowOptionsProvider
+public sealed class OpenGLWindowOptionsProvider : PlatformWindowOptionsProvider
 {
     public WindowOptions CreateOptions()
     {

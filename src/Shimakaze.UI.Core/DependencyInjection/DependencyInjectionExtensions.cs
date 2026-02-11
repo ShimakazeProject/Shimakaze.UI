@@ -13,29 +13,29 @@ public static class DependencyInjectionExtensions
     public static IServiceCollection UseWindowProvider
         <[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TWindowProvider>(
         this IServiceCollection services)
-        where TWindowProvider : class, IWindowProvider
+        where TWindowProvider : class, PlatformWindowProvider
     {
         services.TryAddSingleton<TWindowProvider>();
-        services.TryAddSingleton<IWindowProvider>(provider => provider.GetRequiredService<TWindowProvider>());
+        services.TryAddSingleton<PlatformWindowProvider>(provider => provider.GetRequiredService<TWindowProvider>());
         return services;
     }
 
     public static IServiceCollection UseWindowOptionsProvider
         <[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TWindowOptionsProvider>(
         this IServiceCollection services)
-        where TWindowOptionsProvider : class, IWindowOptionsProvider
+        where TWindowOptionsProvider : class, PlatformWindowOptionsProvider
     {
         services.TryAddSingleton<TWindowOptionsProvider>();
-        services.TryAddSingleton<IWindowOptionsProvider>(provider => provider.GetRequiredService<TWindowOptionsProvider>());
+        services.TryAddSingleton<PlatformWindowOptionsProvider>(provider => provider.GetRequiredService<TWindowOptionsProvider>());
         return services;
     }
 
     public static IServiceCollection AddWindow<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TWindow>(
         this IServiceCollection services)
-        where TWindow : Window
+        where TWindow : PlatformWindow
     {
-        var descriptor = ServiceDescriptor.Transient<Window, TWindow>();
+        var descriptor = ServiceDescriptor.Transient<PlatformWindow, TWindow>();
 
         services.TryAddEnumerable(descriptor);
 

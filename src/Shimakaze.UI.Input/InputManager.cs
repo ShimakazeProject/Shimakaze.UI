@@ -34,9 +34,9 @@ public sealed class InputManager : IDisposable
     public event UIEventHandler<InputManager, KeyboardKeyEventArgs>? KeyboardKeyDown;
     public event UIEventHandler<InputManager, KeyboardKeyEventArgs>? KeyboardKeyUp;
 
-    public Window Window { get; }
+    public PlatformWindow Window { get; }
 
-    internal InputManager(IInputContextProvider inputContextProvider, Window window)
+    internal InputManager(IInputContextProvider inputContextProvider, PlatformWindow window)
     {
         Window = window;
 
@@ -46,9 +46,9 @@ public sealed class InputManager : IDisposable
             window.Initialize += Initialize(inputContextProvider);
     }
 
-    private UIEventHandler<Window> Initialize(IInputContextProvider inputContextProvider) => (window, eventArgs) =>
+    private UIEventHandler<PlatformWindow> Initialize(IInputContextProvider inputContextProvider) => (window, eventArgs) =>
     {
-        _inputContext = inputContextProvider.CreateInputContext(((INativeWindow)window).Native);
+        _inputContext = inputContextProvider.CreateInputContext(window.Native);
         _inputContext.ConnectionChanged += OnInputDeviceConnectionChanged;
         foreach (var device in _inputContext.Devices)
             InitializeInputDevice(device, device.IsConnected);

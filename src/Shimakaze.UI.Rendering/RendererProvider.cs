@@ -8,10 +8,10 @@ namespace Shimakaze.UI.Rendering;
 
 public abstract class RendererProvider : IRendererProvider
 {
-    public virtual BaseRenderer GetRenderer(INativeWindow window)
+    public virtual BaseRenderer GetRenderer(PlatformWindow window)
         => new(GetSurface(window.Native));
 
-    public virtual SKSurface GetSurface(INativeWindow window)
+    public virtual SKSurface GetSurface(PlatformWindow window)
         => GetSurface(window.Native);
 
     protected abstract SKSurface GetSurface(IWindow window);

@@ -8,7 +8,7 @@ using Silk.NET.Windowing.Glfw;
 
 namespace Shimakaze.UI.Glfw;
 
-public sealed class GlfwProvider : IWindowProvider, IInputContextProvider
+public sealed class GlfwProvider : PlatformWindowProvider, IInputContextProvider
 {
     public IInputContext CreateInputContext(IWindow window)
     {

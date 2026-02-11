@@ -13,8 +13,8 @@ public sealed class Application : IHost
     private bool _disposedValue;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    private readonly IWindowOptionsProvider _windowOptionsProvider;
-    private readonly IWindowProvider _windowProvider;
+    private readonly PlatformWindowOptionsProvider _windowOptionsProvider;
+    private readonly PlatformWindowProvider _windowProvider;
     private readonly IHostApplicationLifetime _lifetime;
 
     public static Application Instance { get; private set; } = default!;
@@ -32,8 +32,8 @@ public sealed class Application : IHost
         Instance = this;
         Services = serviceProvider;
 
-        _windowOptionsProvider = serviceProvider.GetRequiredService<IWindowOptionsProvider>();
-        _windowProvider = serviceProvider.GetRequiredService<IWindowProvider>();
+        _windowOptionsProvider = serviceProvider.GetRequiredService<PlatformWindowOptionsProvider>();
+        _windowProvider = serviceProvider.GetRequiredService<PlatformWindowProvider>();
         _lifetime = serviceProvider.GetRequiredService<IHostApplicationLifetime>();
         Logger = serviceProvider.GetRequiredService<ILogger<Application>>();
         Dispatcher = serviceProvider.GetRequiredService<Dispatcher>();

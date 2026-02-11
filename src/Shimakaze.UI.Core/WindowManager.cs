@@ -4,17 +4,17 @@ namespace Shimakaze.UI.Core;
 
 public sealed class WindowManager
 {
-    private readonly LinkedList<INativeWindow> _windows = [];
+    private readonly LinkedList<PlatformWindow> _windows = [];
 
     private bool _initialized = false;
     public bool IsEmpty => _windows.Count == 0;
 
-    internal void Register(Window window)
+    internal void Register(PlatformWindow window)
     {
         if (_windows.Contains(window))
             return;
 
-        INativeWindow nativeWindow = window;
+        PlatformWindow nativeWindow = window;
         var node = _windows.AddLast(window);
         window.Closed += (_, _) => _windows.Remove(node);
 
@@ -30,7 +30,7 @@ public sealed class WindowManager
         _initialized = true;
 
         // 什么也不做 因为 Window 构造方法已经注册了
-        _ = Application.Instance.Services.GetServices<Window>();
+        _ = Application.Instance.Services.GetServices<PlatformWindow>();
 
         var node = _windows.First;
         while (node != null)

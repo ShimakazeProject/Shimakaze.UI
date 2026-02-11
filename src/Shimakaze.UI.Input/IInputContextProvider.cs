@@ -10,5 +10,5 @@ public interface IInputContextProvider
     IInputContext CreateInputContext(IWindow window);
 
     InputManager CreateInputManager(Core.Window window)
-        => CoreExtensions.Get(this, window);
+        => CoreExtensions.GetInputManager(this, window);
 }

@@ -59,7 +59,7 @@ sealed class MainWindow : Window
 
         this.Input.MouseScroll += Scroll;
         this.Input.MouseClick += Click;
-        this.Input.KeyboardKeyDown += KeyDown;
+        this.Keyboard.KeyPressed += KeyPressed;
 
         await Task.Run(async () =>
         {
@@ -76,7 +76,7 @@ sealed class MainWindow : Window
         }).ConfigureAwait(false);
     }
 
-    private void KeyDown(InputManager sender, KeyboardKeyEventArgs eventArgs)
+    private void KeyPressed(KeyboardManager sender, KeyboardKeyEventArgs eventArgs)
     {
         switch (eventArgs.Key)
         {
@@ -175,6 +175,8 @@ sealed class MainWindow : Window
 
     protected override void OnRender(double time)
     {
+        base.OnRender(time);
+
         INativeWindow native = this;
         using var renderer = Application.GetRenderer(this);
 

@@ -11,11 +11,20 @@ namespace Shimakaze.UI.Core;
 public static class CoreExtensions
 {
     private static readonly ConcurrentDictionary<Window, InputManager> InputManagers = [];
+    private static readonly ConcurrentDictionary<InputManager, KeyboardManager> KeyboardManagers = [];
 
-    internal static InputManager Get(IInputContextProvider provider, Window window)
+    internal static InputManager GetInputManager(IInputContextProvider provider, Window window)
     {
         var result = InputManagers.GetOrAdd(window, _ => new(provider, window));
         window.Closed += (_, _) => InputManagers.Remove(window, out _);
+
+        return result;
+    }
+
+    internal static KeyboardManager GetKeyboardManager(InputManager inputManager)
+    {
+        var result = KeyboardManagers.GetOrAdd(inputManager, static v => new(v));
+        inputManager.Window.Closed += (_, _) => KeyboardManagers.Remove(inputManager, out _);
 
         return result;
     }
@@ -28,7 +37,8 @@ public static class CoreExtensions
 
     extension(Window window)
     {
-        public InputManager Input => Get(Application.Instance.InputContextProvider, window);
+        public InputManager Input => GetInputManager(Application.Instance.InputContextProvider, window);
+        public KeyboardManager Keyboard => GetKeyboardManager(window.Input);
     }
 
 }

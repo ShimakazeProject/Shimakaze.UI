@@ -19,6 +19,8 @@ sealed record class CursorsFrame
     public SKBitmap? SizeAll { get; init; }
     public SKBitmap? UpArrow { get; init; }
     public SKBitmap? Hand { get; init; }
+    public SKBitmap? Person { get; init; }
+    public SKBitmap? Pin { get; init; }
 
     public void Draw(Renderer renderer, float x, float y, in int cursorWidth)
     {
@@ -80,6 +82,14 @@ sealed record class CursorsFrame
 
         if (Hand is not null)
             renderer.DrawBitmap(Hand, x, y);
+        x += cursorWidth;
+
+        if (Person is not null)
+            renderer.DrawBitmap(Person, x, y);
+        x += cursorWidth;
+
+        if (Pin is not null)
+            renderer.DrawBitmap(Pin, x, y);
         x += cursorWidth;
     }
 }

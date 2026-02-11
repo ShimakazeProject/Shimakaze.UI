@@ -219,7 +219,7 @@ sealed class MainWindow : Window
 
                 renderer.DrawText(
                     "Apply",
-                    StartX + _cursorWidth * 15,
+                    StartX + _cursorWidth * 17,
                     y + (_cursorHeight / 2) + _descentRight,
                     TextAlign.Left,
                     _fontRightSide);
@@ -234,34 +234,39 @@ sealed class MainWindow : Window
         using var rotatedRenderer = renderer.RotateDegrees(Degrees);
 
         float x = StartX + _cursorWidth / 2;
-        rotatedRenderer.DrawText("Arrow", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Normal", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
         rotatedRenderer.DrawText("Help", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
-        rotatedRenderer.DrawText("AppStarting", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Working", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
-        rotatedRenderer.DrawText("Wait", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Busy", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
-        rotatedRenderer.DrawText("Crosshair", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Precision", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
-        rotatedRenderer.DrawText("IBeam", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Text", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
-        rotatedRenderer.DrawText("NWPen", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Handwriting", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
-        rotatedRenderer.DrawText("No", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Unavailable", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
-        rotatedRenderer.DrawText("SizeNS", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Vertical", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
-        rotatedRenderer.DrawText("SizeWE", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Horizontal", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
-        rotatedRenderer.DrawText("SizeNWSE", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Diagonal1", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
-        rotatedRenderer.DrawText("SizeNESW", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Diagonal2", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
-        rotatedRenderer.DrawText("SizeAll", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Move", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
-        rotatedRenderer.DrawText("UpArrow", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Alternate", x, StartY, TextAlign.Left, _fontHeader);
         x += _cursorWidth;
-        rotatedRenderer.DrawText("Hand", x, StartY, TextAlign.Left, _fontHeader);
+        rotatedRenderer.DrawText("Link", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("Person", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
+        rotatedRenderer.DrawText("Pin", x, StartY, TextAlign.Left, _fontHeader);
+        x += _cursorWidth;
     }
 }

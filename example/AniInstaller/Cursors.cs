@@ -25,6 +25,8 @@ sealed record class Cursors(string Name)
     public IReadOnlyList<SKBitmap>? SizeAll { get; set; }
     public IReadOnlyList<SKBitmap>? UpArrow { get; set; }
     public IReadOnlyList<SKBitmap>? Hand { get; set; }
+    public IReadOnlyList<SKBitmap>? Person { get; set; }
+    public IReadOnlyList<SKBitmap>? Pin { get; set; }
 
     public string? ArrowPath
     {
@@ -161,6 +163,24 @@ sealed record class Cursors(string Name)
             HandName = Path.GetFileName(value);
         }
     }
+    public string? PersonPath
+    {
+        get => field;
+        set
+        {
+            field = value;
+            PersonName = Path.GetFileName(value);
+        }
+    }
+    public string? PinPath
+    {
+        get => field;
+        set
+        {
+            field = value;
+            PinName = Path.GetFileName(value);
+        }
+    }
 
     public string? ArrowName { get; set; }
     public string? HelpName { get; set; }
@@ -177,6 +197,8 @@ sealed record class Cursors(string Name)
     public string? SizeAllName { get; set; }
     public string? UpArrowName { get; set; }
     public string? HandName { get; set; }
+    public string? PersonName { get; set; }
+    public string? PinName { get; set; }
     public CursorsFrame GetFrame(int frame) => new()
     {
         Arrow = Arrow?[frame % Arrow.Count],
@@ -194,6 +216,8 @@ sealed record class Cursors(string Name)
         SizeAll = SizeAll?[frame % SizeAll.Count],
         UpArrow = UpArrow?[frame % UpArrow.Count],
         Hand = Hand?[frame % Hand.Count],
+        Person = Person?[frame % Person.Count],
+        Pin = Pin?[frame % Pin.Count],
     };
 
     [SupportedOSPlatform("windows")]

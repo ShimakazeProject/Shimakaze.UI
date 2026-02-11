@@ -3,7 +3,7 @@
     <Project Path="analyzer/Shimakaze.UI.MVVM.SourceGenerator/Shimakaze.UI.MVVM.SourceGenerator.csproj" />
   </Folder>
   <Folder Name="/example/">
-    <Project Path="example/AniInstaller/AniInstaller.csproj" />
+    <Project Path="example/CursorInstaller/CursorInstaller.csproj" />
     <Project Path="example/Example/Example.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">

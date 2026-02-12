@@ -16,6 +16,7 @@
     <File Path="LICENSE" />
     <File Path="nuget.config" />
   </Folder>
+  <Project Path="src/Shimakaze.UI.Binding/Shimakaze.UI.Binding.csproj" />
   <Project Path="src/Shimakaze.UI.Controls/Shimakaze.UI.Controls.csproj" />
   <Project Path="src/Shimakaze.UI.Core/Shimakaze.UI.Core.csproj" />
   <Project Path="src/Shimakaze.UI.Fonts/Shimakaze.UI.Fonts.csproj" />

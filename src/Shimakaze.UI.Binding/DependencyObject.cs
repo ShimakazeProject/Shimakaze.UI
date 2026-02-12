@@ -14,6 +14,9 @@ public abstract class DependencyObject
     // 可选：值来源标记（用于 GetValue 优先级决策）
     private readonly Dictionary<int, ValueSource> _valueSources = [];
 
+    // 路由事件处理程序存储
+    private readonly Dictionary<int, List<RoutedEventHandlerInfo>> _routedEventHandlers = [];
+
 
     // 公开的 SetValue（设置本地值，最高优先级）
     public void SetValue(DependencyProperty dp, object? value)
@@ -95,4 +98,79 @@ public abstract class DependencyObject
                 new DependencyPropertyChangedEventArgs(dp, null, value));
         }
     }
+
+    #region 路由事件支持
+
+    /// <summary>
+    /// 添加路由事件处理程序。
+    /// </summary>
+    /// <param name="routedEvent">要添加处理程序的路由事件</param>
+    /// <param name="handler">要添加的处理程序</param>
+    /// <param name="handledEventsToo">如果为 true，即使事件被标记为已处理也调用此处理程序</param>
+    public void AddHandler(RoutedEvent routedEvent, RoutedEventHandler handler, bool handledEventsToo = false)
+    {
+        var index = routedEvent.GlobalIndex;
+        if (!_routedEventHandlers.TryGetValue(index, out var handlers))
+        {
+            handlers = [];
+            _routedEventHandlers[index] = handlers;
+        }
+
+        handlers.Add(new RoutedEventHandlerInfo(handler, handledEventsToo));
+    }
+
+    /// <summary>
+    /// 移除路由事件处理程序。
+    /// </summary>
+    /// <param name="routedEvent">要移除处理程序的路由事件</param>
+    /// <param name="handler">要移除的处理程序</param>
+    public void RemoveHandler(RoutedEvent routedEvent, RoutedEventHandler handler)
+    {
+        var index = routedEvent.GlobalIndex;
+        if (_routedEventHandlers.TryGetValue(index, out var handlers))
+        {
+            handlers.RemoveAll(h => h.Handler == handler);
+            if (handlers.Count == 0)
+            {
+                _routedEventHandlers.Remove(index);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 引发指定的路由事件。
+    /// </summary>
+    /// <param name="e">包含事件数据的路由事件参数</param>
+    public void RaiseEvent(RoutedEventArgs e)
+    {
+        if (e.RoutedEvent == null)
+            throw new InvalidOperationException("路由事件参数必须设置 RoutedEvent 属性。");
+
+        // 默认实现：直接调用本地处理程序
+        // 子类（如 UIElement）应该重写此方法以支持冒泡和隧道
+        InvokeEventHandlers(e.RoutedEvent, e, false);
+    }
+
+    /// <summary>
+    /// 调用指定事件的处理程序。
+    /// </summary>
+    /// <param name="routedEvent">路由事件</param>
+    /// <param name="e">事件参数</param>
+    /// <param name="invokeHandledToo">是否调用标记为已处理的处理程序</param>
+    internal void InvokeEventHandlers(RoutedEvent routedEvent, RoutedEventArgs e, bool invokeHandledToo)
+    {
+        var index = routedEvent.GlobalIndex;
+        if (!_routedEventHandlers.TryGetValue(index, out var handlers))
+            return;
+
+        foreach (var handlerInfo in handlers)
+        {
+            if (e.Handled && !handlerInfo.HandledEventsToo && !invokeHandledToo)
+                continue;
+
+            handlerInfo.Handler.Invoke(this, e);
+        }
+    }
+
+    #endregion
 }

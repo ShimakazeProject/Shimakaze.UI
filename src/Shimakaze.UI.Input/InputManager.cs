@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Collections.Concurrent;
+using System.Numerics;
 
 using Shimakaze.UI.Core;
 using Shimakaze.UI.Input.EventArgs;
@@ -10,7 +11,19 @@ namespace Shimakaze.UI.Input;
 public sealed class InputManager : IDisposable
 {
     private IInputContext? _inputContext;
+    private readonly ConcurrentDictionary<Key, KeyboardManagerContext> _states = new();
+
     private bool _disposedValue;
+
+    /// <summary>
+    /// 首次按键重复延迟（秒），默认 0.5 秒
+    /// </summary>
+    public TimeSpan InitialRepeatDelay { get; set; } = TimeSpan.FromSeconds(0.5);
+
+    /// <summary>
+    /// 后续按键重复间隔（秒），默认 0.05 秒
+    /// </summary>
+    public TimeSpan RepeatInterval { get; set; } = TimeSpan.FromSeconds(0.05);
 
     public event UIEventHandler<InputManager, InputDeviceConnectionChangedEventArgs>? InputDeviceConnectionChanged;
 
@@ -33,6 +46,7 @@ public sealed class InputManager : IDisposable
 
     public event UIEventHandler<InputManager, KeyboardKeyEventArgs>? KeyboardKeyDown;
     public event UIEventHandler<InputManager, KeyboardKeyEventArgs>? KeyboardKeyUp;
+    public event UIEventHandler<InputManager, KeyboardKeyPressedEventArgs>? KeyboardKeyPressed;
 
     public PlatformWindow Window { get; }
 
@@ -48,11 +62,37 @@ public sealed class InputManager : IDisposable
 
     private UIEventHandler<PlatformWindow> Initialize(IInputContextProvider inputContextProvider) => (window, eventArgs) =>
     {
+        window.Update += OnWindowUpdate;
         _inputContext = inputContextProvider.CreateInputContext(window.Native);
         _inputContext.ConnectionChanged += OnInputDeviceConnectionChanged;
         foreach (var device in _inputContext.Devices)
             InitializeInputDevice(device, device.IsConnected);
     };
+
+    private void OnWindowUpdate(PlatformWindow sender, WindowUpdateEventArgs eventArgs)
+    {
+        var dt = TimeSpan.FromSeconds(eventArgs.DeltaTime);
+
+        foreach (var state in _states.Values)
+        {
+            var prevTime = state.PressingTime;
+            state.PressingTime += dt;
+            var curTime = state.PressingTime;
+
+            // 检查是否已经超过初始延迟，未超过则不触发重复
+            if (curTime < InitialRepeatDelay)
+                continue;
+
+            var prevOver = prevTime - InitialRepeatDelay;
+            var curOver = curTime - InitialRepeatDelay;
+
+            var curRep = (int)(curOver / RepeatInterval);
+            var prevRep = (int)(prevOver / RepeatInterval);
+
+            if (curRep > prevRep)
+                OnKeyboardKeyPressed(state);
+        }
+    }
 
     private void InitializeInputDevice(IInputDevice device, bool connected)
     {
@@ -151,12 +191,22 @@ public sealed class InputManager : IDisposable
 
     private void OnKeyboardKeyDown(IKeyboard keyboard, Key key, int scancode)
     {
+        KeyboardManagerContext context = new(keyboard, key, scancode);
+        _states.TryAdd(key, context);
         KeyboardKeyDown?.Invoke(this, new(keyboard, key, scancode));
+        OnKeyboardKeyPressed(context);
     }
 
     private void OnKeyboardKeyUp(IKeyboard keyboard, Key key, int scancode)
     {
+        _states.Remove(key, out _);
         KeyboardKeyUp?.Invoke(this, new(keyboard, key, scancode));
+    }
+
+    private void OnKeyboardKeyPressed(KeyboardManagerContext context)
+    {
+        KeyboardKeyPressed?.Invoke(this, context.Build());
+        context.RepeatCount++;
     }
 
     private void OnMouseDown(IMouse mouse, MouseButton button)
@@ -195,7 +245,6 @@ public sealed class InputManager : IDisposable
         InputDeviceConnectionChanged?.Invoke(this, new(device, connected));
     }
 
-
     private void Dispose(bool disposing)
     {
         if (_disposedValue)
@@ -220,5 +269,17 @@ public sealed class InputManager : IDisposable
         // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+
+    private sealed class KeyboardManagerContext(IKeyboard keyboard, Key key, int scancode)
+    {
+        public TimeSpan PressingTime { get; set; }
+        public int RepeatCount { get; set; }
+        public IKeyboard Keyboard { get; } = keyboard;
+        public Key Key { get; } = key;
+        public int Scancode { get; } = scancode;
+
+        public KeyboardKeyPressedEventArgs Build()
+            => new(Keyboard, Key, Scancode, RepeatCount > 0, RepeatCount);
     }
 }

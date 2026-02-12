@@ -42,7 +42,6 @@ sealed class MainWindow : PlatformWindow
         Color = Color.FromArgb(0x7F808080).ToSkia(),
     };
 
-
     protected override async void OnInitialize()
     {
         base.OnInitialize();
@@ -58,7 +57,7 @@ sealed class MainWindow : PlatformWindow
 
         this.Input.MouseScroll += Scroll;
         this.Input.MouseClick += Click;
-        this.Keyboard.KeyPressed += KeyPressed;
+        this.Input.KeyboardKeyPressed += KeyPressed;
 
         await Task.Run(async () =>
         {
@@ -75,7 +74,7 @@ sealed class MainWindow : PlatformWindow
         }).ConfigureAwait(false);
     }
 
-    private void KeyPressed(KeyboardManager sender, KeyboardKeyEventArgs eventArgs)
+    private void KeyPressed(InputManager sender, KeyboardKeyPressedEventArgs eventArgs)
     {
         switch (eventArgs.Key)
         {

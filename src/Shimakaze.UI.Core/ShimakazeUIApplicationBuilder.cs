@@ -5,7 +5,7 @@ using Microsoft.Extensions.Diagnostics.Metrics;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-using Shimakaze.UI.Core.Dispatchers;
+using Shimakaze.UI.Core.Threading;
 
 namespace Shimakaze.UI.Core;
 

@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Channels;
 
-namespace Shimakaze.UI.Core.Dispatchers;
+namespace Shimakaze.UI.Core.Threading;
 
 public sealed class Dispatcher
 {

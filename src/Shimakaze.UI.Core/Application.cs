@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-using Shimakaze.UI.Core.Dispatchers;
+using Shimakaze.UI.Core.Threading;
 
 using Silk.NET.Windowing;
 

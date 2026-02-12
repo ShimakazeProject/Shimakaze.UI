@@ -1,6 +1,6 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
-namespace Shimakaze.UI.Core.Dispatchers;
+namespace Shimakaze.UI.Core.Threading;
 
 public interface IDispatcherTaskAwaiter : ICriticalNotifyCompletion
 {

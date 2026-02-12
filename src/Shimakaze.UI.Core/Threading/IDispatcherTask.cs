@@ -1,4 +1,4 @@
-namespace Shimakaze.UI.Core.Dispatchers;
+﻿namespace Shimakaze.UI.Core.Threading;
 
 public interface IDispatcherTask
 {

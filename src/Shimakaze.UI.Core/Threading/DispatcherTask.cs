@@ -1,4 +1,4 @@
-namespace Shimakaze.UI.Core.Dispatchers;
+﻿namespace Shimakaze.UI.Core.Threading;
 
 internal class DispatcherTask : IDispatcherTask
 {

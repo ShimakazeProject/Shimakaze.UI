@@ -147,7 +147,7 @@ public abstract class DependencyObject
     /// 引发指定的路由事件。
     /// </summary>
     /// <param name="e">包含事件数据的路由事件参数</param>
-    public void RaiseEvent(RoutedEventArgs e)
+    public virtual void RaiseEvent(RoutedEventArgs e)
     {
         if (e.RoutedEvent == null)
             throw new InvalidOperationException("路由事件参数必须设置 RoutedEvent 属性。");
@@ -158,12 +158,23 @@ public abstract class DependencyObject
     }
 
     /// <summary>
+    /// 调用指定事件的处理程序（用于路由）。
+    /// </summary>
+    /// <param name="routedEvent">路由事件</param>
+    /// <param name="e">事件参数</param>
+    /// <param name="invokeHandledToo">是否调用标记为已处理的处理程序</param>
+    public void InvokeEventHandlersForRoute(RoutedEvent routedEvent, RoutedEventArgs e, bool invokeHandledToo)
+    {
+        InvokeEventHandlers(routedEvent, e, invokeHandledToo);
+    }
+
+    /// <summary>
     /// 调用指定事件的处理程序。
     /// </summary>
     /// <param name="routedEvent">路由事件</param>
     /// <param name="e">事件参数</param>
     /// <param name="invokeHandledToo">是否调用标记为已处理的处理程序</param>
-    internal void InvokeEventHandlers(RoutedEvent routedEvent, RoutedEventArgs e, bool invokeHandledToo)
+    protected virtual void InvokeEventHandlers(RoutedEvent routedEvent, RoutedEventArgs e, bool invokeHandledToo)
     {
         var index = routedEvent.GlobalIndex;
         if (!_routedEventHandlers.TryGetValue(index, out var handlers))

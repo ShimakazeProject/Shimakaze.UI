@@ -105,10 +105,13 @@ public abstract class DependencyObject
     /// 添加路由事件处理程序。
     /// </summary>
     /// <param name="routedEvent">要添加处理程序的路由事件</param>
-    /// <param name="handler">要添加的处理程序</param>
+    /// <param name="handler">要添加的处理程序，如果为 null 则忽略</param>
     /// <param name="handledEventsToo">如果为 true，即使事件被标记为已处理也调用此处理程序</param>
-    public void AddHandler(RoutedEvent routedEvent, RoutedEventHandler handler, bool handledEventsToo = false)
+    public void AddHandler(RoutedEvent routedEvent, RoutedEventHandler? handler, bool handledEventsToo = false)
     {
+        if (handler is null)
+            return;
+
         var index = routedEvent.GlobalIndex;
         if (!_routedEventHandlers.TryGetValue(index, out var handlers))
         {
@@ -123,9 +126,12 @@ public abstract class DependencyObject
     /// 移除路由事件处理程序。
     /// </summary>
     /// <param name="routedEvent">要移除处理程序的路由事件</param>
-    /// <param name="handler">要移除的处理程序</param>
-    public void RemoveHandler(RoutedEvent routedEvent, RoutedEventHandler handler)
+    /// <param name="handler">要移除的处理程序，如果为 null 则忽略</param>
+    public void RemoveHandler(RoutedEvent routedEvent, RoutedEventHandler? handler)
     {
+        if (handler is null)
+            return;
+
         var index = routedEvent.GlobalIndex;
         if (_routedEventHandlers.TryGetValue(index, out var handlers))
         {

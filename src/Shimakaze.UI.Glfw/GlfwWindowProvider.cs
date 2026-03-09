@@ -21,7 +21,7 @@ public sealed class GlfwProvider : PlatformWindowProvider, IInputContextProvider
     {
         GlfwWindowing.RegisterPlatform();
 
-        var window = Silk.NET.Windowing.Window.Create(options);
+        var window = Window.Create(options);
 
         if (OperatingSystem.IsWindows())
             Windows.Register(window);

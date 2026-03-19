@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 var builder = Host.CreateShimakazeUIApplicationBuilder(args);
 builder.Services.UseGlfw();
 builder.Services.UseOpenGL();
-builder.Services.AddWindow<MainWindow>();
+builder.Services.AddPlatformWindow<MainWindow>();
 
 var app = builder.Build();
 

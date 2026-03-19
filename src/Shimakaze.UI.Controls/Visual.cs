@@ -10,10 +10,10 @@ public abstract class Visual : DependencyObject
     /// <summary>
     /// 获取或设置元素的可见性。
     /// </summary>
-    public Visiblity Visiblity
+    public Visibility Visibility
     {
-        get => IsVisible ? Visiblity.Visible : Visiblity.Collapsed;
-        set => IsVisible = value == Visiblity.Visible;
+        get => IsVisible ? Visibility.Visible : Visibility.Collapsed;
+        set => IsVisible = value == Visibility.Visible;
     }
 
     /// <summary>

@@ -3,7 +3,7 @@ namespace Shimakaze.UI;
 /// <summary>
 /// 元素的可见性。
 /// </summary>
-public enum Visiblity
+public enum Visibility
 {
     /// <summary>
     /// 元素可见。

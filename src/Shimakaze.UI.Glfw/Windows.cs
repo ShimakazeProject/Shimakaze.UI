@@ -6,6 +6,7 @@ using System.Runtime.Versioning;
 using Microsoft.Win32;
 
 using Silk.NET.Windowing;
+using Silk.NET.Windowing.Glfw;
 
 using Windows.Win32;
 using Windows.Win32.Foundation;

@@ -1,55 +1,15 @@
-using System.Drawing;
+﻿using System.Drawing;
+
+using Shimakaze.UI.Core;
+using Shimakaze.UI.Rendering;
 
 namespace Shimakaze.UI;
 
 /// <summary>
 /// 表示用户界面 (UI) 元素的基类，提供交互功能和路由事件支持。
 /// </summary>
-public class UIElement : Visual
+public partial class UIElement : Visual
 {
-    #region 依赖属性
-
-    /// <summary>
-    /// 标识 Width 依赖属性。
-    /// </summary>
-    public static readonly DependencyProperty WidthProperty = DependencyProperty.Register(
-        nameof(Width),
-        typeof(float),
-        typeof(UIElement),
-        new PropertyMetadata(float.NaN)
-    );
-
-    /// <summary>
-    /// 标识 Height 依赖属性。
-    /// </summary>
-    public static readonly DependencyProperty HeightProperty = DependencyProperty.Register(
-        nameof(Height),
-        typeof(float),
-        typeof(UIElement),
-        new PropertyMetadata(float.NaN)
-    );
-
-    /// <summary>
-    /// 标识 Margin 依赖属性。
-    /// </summary>
-    public static readonly DependencyProperty MarginProperty = DependencyProperty.Register(
-        nameof(Margin),
-        typeof(Thickness),
-        typeof(UIElement),
-        new PropertyMetadata(new Thickness())
-    );
-
-    /// <summary>
-    /// 标识 IsEnabled 依赖属性。
-    /// </summary>
-    public static readonly DependencyProperty IsEnabledProperty = DependencyProperty.Register(
-        nameof(IsEnabled),
-        typeof(bool),
-        typeof(UIElement),
-        new PropertyMetadata(true)
-    );
-
-    #endregion
 
     #region 路由事件 - 冒泡事件
 
@@ -179,71 +139,6 @@ public class UIElement : Visual
 
     #endregion
 
-    #region 属性
-
-    /// <summary>
-    /// 获取或设置元素的宽度。
-    /// </summary>
-    public float Width
-    {
-        get => (float)GetValue(WidthProperty)!;
-        set => SetValue(WidthProperty, value);
-    }
-
-    /// <summary>
-    /// 获取或设置元素的高度。
-    /// </summary>
-    public float Height
-    {
-        get => (float)GetValue(HeightProperty)!;
-        set => SetValue(HeightProperty, value);
-    }
-
-    /// <summary>
-    /// 获取或设置元素的外边距。
-    /// </summary>
-    public Thickness Margin
-    {
-        get => (Thickness)GetValue(MarginProperty)!;
-        set => SetValue(MarginProperty, value);
-    }
-
-    /// <summary>
-    /// 获取或设置一个值，该值指示元素是否启用。
-    /// </summary>
-    public bool IsEnabled
-    {
-        get => (bool)GetValue(IsEnabledProperty)!;
-        set => SetValue(IsEnabledProperty, value);
-    }
-
-    /// <summary>
-    /// 获取元素的渲染边界。
-    /// </summary>
-    public override RectangleF RenderBounds
-    {
-        get
-        {
-            if (Visiblity != Visiblity.Visible)
-                return RectangleF.Empty;
-
-            var width = float.IsNaN(Width) ? 0 : Width;
-            var height = float.IsNaN(Height) ? 0 : Height;
-            return new RectangleF(0, 0, width + Margin.Horizontal, height + Margin.Vertical);
-        }
-    }
-
-    /// <summary>
-    /// 获取实际渲染宽度（考虑 Margin）。
-    /// </summary>
-    public float ActualWidth => float.IsNaN(Width) ? 0 : Width + Margin.Horizontal;
-
-    /// <summary>
-    /// 获取实际渲染高度（考虑 Margin）。
-    /// </summary>
-    public float ActualHeight => float.IsNaN(Height) ? 0 : Height + Margin.Vertical;
-
-    #endregion
 
     #region 事件 - 冒泡事件
 
@@ -370,7 +265,7 @@ public class UIElement : Visual
     /// <returns>如果点在元素内则返回 true，否则返回 false</returns>
     public override bool HitTest(PointF point) =>
         IsEnabled &&
-        Visiblity == Visiblity.Visible &&
+        Visibility == Visibility.Visible &&
         RenderBounds.Contains(point);
 
     /// <summary>
@@ -557,7 +452,7 @@ public class UIElement : Visual
     /// <returns>如果成功获得焦点则返回 true，否则返回 false</returns>
     public virtual bool Focus()
     {
-        if (!IsEnabled || Visiblity != Visiblity.Visible)
+        if (!IsEnabled || Visibility != Visibility.Visible)
             return false;
 
         OnGotFocus();
@@ -573,4 +468,21 @@ public class UIElement : Visual
     }
 
     #endregion
+
+    public event UIEventHandler<UIElement>? Initialize;
+    public event UIEventHandler<UIElement, UpdateEventArgs>? Update;
+    public event UIEventHandler<UIElement, RenderEventArgs>? Render;
+
+    protected internal virtual void OnInitialize()
+        => Initialize?.Invoke(this, EventArgs.Empty);
+
+    protected internal virtual void OnUpdate(double deltaTime)
+    {
+        Update?.Invoke(this, new(deltaTime));
+    }
+
+    protected internal virtual void OnRender(Renderer renderer, double deltaTime)
+    {
+        Render?.Invoke(this, new(renderer, deltaTime));
+    }
 }

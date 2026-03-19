@@ -23,7 +23,7 @@
   <Project Path="src/Shimakaze.UI.Glfw/Shimakaze.UI.Glfw.csproj" />
   <Project Path="src/Shimakaze.UI.Input/Shimakaze.UI.Input.csproj" />
   <Project Path="src/Shimakaze.UI.Media/Shimakaze.UI.Media.csproj" />
-<Project Path="src/Shimakaze.UI.MVVM/Shimakaze.UI.MVVM.csproj" />
+  <Project Path="src/Shimakaze.UI.MVVM/Shimakaze.UI.MVVM.csproj" />
   <Project Path="src/Shimakaze.UI.Rendering.OpenGL/Shimakaze.UI.Rendering.OpenGL.csproj" />
   <Project Path="src/Shimakaze.UI.Rendering/Shimakaze.UI.Rendering.csproj" />
 </Solution>

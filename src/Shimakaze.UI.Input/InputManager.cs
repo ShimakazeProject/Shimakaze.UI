@@ -69,7 +69,7 @@ public sealed class InputManager : IDisposable
             InitializeInputDevice(device, device.IsConnected);
     };
 
-    private void OnWindowUpdate(PlatformWindow sender, WindowUpdateEventArgs eventArgs)
+    private void OnWindowUpdate(PlatformWindow sender, UpdateEventArgs eventArgs)
     {
         var dt = TimeSpan.FromSeconds(eventArgs.DeltaTime);
 

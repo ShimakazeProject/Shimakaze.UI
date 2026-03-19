@@ -6,7 +6,7 @@ using Silk.NET.Windowing;
 
 namespace Shimakaze.UI.Core;
 
-public partial class PlatformWindow
+public partial class PlatformWindow : IDisposable
 {
     public readonly IWindow Native;
 
@@ -26,8 +26,8 @@ public partial class PlatformWindow
     public event UIEventHandler<PlatformWindow, WindowResizeEventArgs>? FramebufferResize;
 
     public event UIEventHandler<PlatformWindow>? Initialize;
-    public event UIEventHandler<PlatformWindow, WindowUpdateEventArgs>? Update;
-    public event UIEventHandler<PlatformWindow, WindowUpdateEventArgs>? Render;
+    public event UIEventHandler<PlatformWindow, UpdateEventArgs>? Update;
+    public event UIEventHandler<PlatformWindow, UpdateEventArgs>? Render;
     public event UIEventHandler<PlatformWindow, CancelEventArgs>? Closing;
     public event UIEventHandler<PlatformWindow>? Closed;
 
@@ -52,44 +52,28 @@ public partial class PlatformWindow
     }
 
     protected virtual void OnMove(Vector2D<int> position)
-    {
-        Move?.Invoke(this, new(position));
-    }
+        => Move?.Invoke(this, new(position));
 
     protected virtual void OnStateChanged(WindowState windowState)
-    {
-        StateChanged?.Invoke(this, new(windowState));
-    }
+        => StateChanged?.Invoke(this, new(windowState));
 
     protected virtual void OnFocusChanged(bool focused)
-    {
-        FocusChanged?.Invoke(this, new(focused));
-    }
+        => FocusChanged?.Invoke(this, new(focused));
 
     protected virtual void OnResize(Vector2D<int> newSize)
-    {
-        Resize?.Invoke(this, new(newSize));
-    }
+        => Resize?.Invoke(this, new(newSize));
 
     protected virtual void OnFramebufferResize(Vector2D<int> newSize)
-    {
-        FramebufferResize?.Invoke(this, new(newSize));
-    }
+        => FramebufferResize?.Invoke(this, new(newSize));
 
     protected virtual void OnInitialize()
-    {
-        Initialize?.Invoke(this, EventArgs.Empty);
-    }
+        => Initialize?.Invoke(this, EventArgs.Empty);
 
     protected virtual void OnUpdate(double deltaTime)
-    {
-        Update?.Invoke(this, new(deltaTime));
-    }
+        => Update?.Invoke(this, new(deltaTime));
 
     protected virtual void OnRender(double deltaTime)
-    {
-        Render?.Invoke(this, new(deltaTime));
-    }
+        => Render?.Invoke(this, new(deltaTime));
 
     protected virtual void OnClosing(bool cancel)
     {
@@ -103,9 +87,7 @@ public partial class PlatformWindow
     }
 
     protected virtual void OnFileDrop(string[] paths)
-    {
-        FileDrop?.Invoke(this, new(paths));
-    }
+        => FileDrop?.Invoke(this, new(paths));
 
     protected virtual void Dispose(bool disposing)
     {

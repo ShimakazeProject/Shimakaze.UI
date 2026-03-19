@@ -1,6 +1,6 @@
 namespace Shimakaze.UI.Core;
 
-public sealed class WindowUpdateEventArgs(double deltaTime) : EventArgs
+public sealed class UpdateEventArgs(double deltaTime) : EventArgs
 {
     public double DeltaTime { get; } = deltaTime;
 }

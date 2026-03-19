@@ -30,12 +30,24 @@ public static class DependencyInjectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddWindow<
+    public static IServiceCollection AddPlatformWindow<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TWindow>(
         this IServiceCollection services)
         where TWindow : PlatformWindow
     {
         var descriptor = ServiceDescriptor.Transient<PlatformWindow, TWindow>();
+
+        services.TryAddEnumerable(descriptor);
+
+        return services;
+    }
+
+    public static IServiceCollection AddWindow<
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TWindow>(
+        this IServiceCollection services)
+        where TWindow : class, IPlatformWindowWrap
+    {
+        var descriptor = ServiceDescriptor.Transient<IPlatformWindowWrap, TWindow>();
 
         services.TryAddEnumerable(descriptor);
 

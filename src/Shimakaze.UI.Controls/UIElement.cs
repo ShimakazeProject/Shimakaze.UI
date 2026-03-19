@@ -471,18 +471,10 @@ public partial class UIElement : Visual
 
     public event UIEventHandler<UIElement>? Initialize;
     public event UIEventHandler<UIElement, UpdateEventArgs>? Update;
-    public event UIEventHandler<UIElement, RenderEventArgs>? Render;
 
     protected internal virtual void OnInitialize()
         => Initialize?.Invoke(this, EventArgs.Empty);
 
     protected internal virtual void OnUpdate(double deltaTime)
-    {
-        Update?.Invoke(this, new(deltaTime));
-    }
-
-    protected internal virtual void OnRender(Renderer renderer, double deltaTime)
-    {
-        Render?.Invoke(this, new(renderer, deltaTime));
-    }
+        => Update?.Invoke(this, new(deltaTime));
 }

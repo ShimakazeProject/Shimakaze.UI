@@ -1,5 +1,8 @@
 ﻿using System.Drawing;
 
+using Shimakaze.UI.Core;
+using Shimakaze.UI.Rendering;
+
 namespace Shimakaze.UI;
 
 /// <summary>
@@ -12,9 +15,13 @@ public abstract class Visual : DependencyObject
     /// </summary>
     public Visibility Visibility
     {
-        get => IsVisible ? Visibility.Visible : Visibility.Collapsed;
-        set => IsVisible = value == Visibility.Visible;
+        get { return (Visibility)GetValue(VisibilityProperty)!; }
+        set { SetValue(VisibilityProperty, value); }
     }
+
+    // Using a DependencyProperty as the backing store for Visibility.  This enables animation, styling, binding, etc...
+    public static readonly DependencyProperty VisibilityProperty =
+        DependencyProperty.Register(nameof(Visibility), typeof(Visibility), typeof(Visual), new PropertyMetadata(Visibility.Visible));
 
     /// <summary>
     /// 获取或设置元素的不透明度因子。
@@ -22,25 +29,30 @@ public abstract class Visual : DependencyObject
     /// <remarks>值在 0.0 到 1.0 之间，0.0 表示完全透明，1.0 表示完全不透明。</remarks>
     public float Opacity
     {
-        get;
-        set => field = Math.Clamp(value, 0.0f, 1.0f);
-    } = 1.0f;
+        get { return (float)GetValue(OpacityProperty)!; }
+        set { SetValue(OpacityProperty, Math.Clamp(value, 0.0f, 1.0f)); }
+    }
+
+    // Using a DependencyProperty as the backing store for Opacity.  This enables animation, styling, binding, etc...
+    public static readonly DependencyProperty OpacityProperty =
+        DependencyProperty.Register(nameof(Opacity), typeof(float), typeof(Visual), new PropertyMetadata(1.0f));
 
     /// <summary>
     /// 获取此元素的父级可视化对象。
     /// </summary>
     public Visual? Parent
     {
-        get;
+        get { return (Visual?)GetValue(ParentProperty); }
         protected internal set
         {
-            if (field == value)
-                return;
-
-            field = value;
+            SetValue(ParentProperty, value);
             OnVisualParentChanged();
         }
     }
+
+    // Using a DependencyProperty as the backing store for Parent.  This enables animation, styling, binding, etc...
+    public static readonly DependencyProperty ParentProperty =
+        DependencyProperty.Register(nameof(Parent), typeof(Visual), typeof(Visual), new PropertyMetadata());
 
     /// <summary>
     /// 获取此元素的渲染边界。
@@ -50,7 +62,7 @@ public abstract class Visual : DependencyObject
     /// <summary>
     /// 获取一个值，该值指示此元素在用户界面 (UI) 中是否可见。
     /// </summary>
-    public bool IsVisible { get; private set; } = true;
+    private bool IsVisible => Visibility is Visibility.Visible;
 
     #region 坐标转换
 
@@ -145,8 +157,6 @@ public abstract class Visual : DependencyObject
 
     #endregion
 
-    #region 虚方法
-
     /// <summary>
     /// 当父级可视化对象更改时调用。
     /// </summary>
@@ -154,12 +164,10 @@ public abstract class Visual : DependencyObject
     {
     }
 
-    /// <summary>
-    /// 当元素需要重新渲染时调用。
-    /// </summary>
-    protected virtual void InvalidateVisual()
-    {
-    }
 
-    #endregion
+    public event UIEventHandler<Visual, RenderEventArgs>? Render;
+    protected internal virtual void OnRender(Renderer renderer, double deltaTime)
+    {
+        Render?.Invoke(this, new(renderer, deltaTime));
+    }
 }

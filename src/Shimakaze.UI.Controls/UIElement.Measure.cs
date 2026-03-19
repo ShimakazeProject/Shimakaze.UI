@@ -1,4 +1,4 @@
-
+﻿
 using System.Drawing;
 
 namespace Shimakaze.UI;
@@ -11,6 +11,21 @@ public partial class UIElement
     public SizeF DesiredSize { get; protected set; }
 
     public bool IsMeasureValid { get; protected set; }
+
+    /// <summary>
+    /// 标记测量失效。通常由属性变更 (Width, Margin 等) 或子元素变化触发。
+    /// </summary>
+    protected void InvalidateMeasure()
+    {
+        if (!IsMeasureValid)
+            return;
+
+        IsMeasureValid = false;
+        IsArrangeValid = false;
+
+        // 可选：通知父容器也需要重新布局
+        // Parent?.InvalidateMeasure(); 
+    }
 
     /// <summary>
     /// 公共测量入口。

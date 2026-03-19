@@ -1,4 +1,4 @@
-
+﻿
 using System.Drawing;
 
 using Shimakaze.UI.Core;
@@ -15,6 +15,14 @@ public class Window : ContentElement, IPlatformWindowWrap, IDisposable
         _window.Initialize += OnInitialize;
         _window.Update += OnUpdate;
         _window.Render += OnRender;
+        _window.Resize += OnResize;
+    }
+
+    private void OnResize(PlatformWindow sender, WindowResizeEventArgs eventArgs)
+    {
+        Width = eventArgs.NewSize.X;
+        Height = eventArgs.NewSize.Y;
+        InvalidateMeasure();
     }
 
     private void OnRender(PlatformWindow sender, UpdateEventArgs eventArgs)

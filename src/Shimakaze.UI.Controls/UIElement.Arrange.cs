@@ -1,4 +1,4 @@
-
+﻿
 using System.Drawing;
 
 namespace Shimakaze.UI;
@@ -17,6 +17,17 @@ public partial class UIElement
     public RectangleF RenderRect { get; protected set; }
 
     public bool IsArrangeValid { get; protected set; }
+
+    /// <summary>
+    /// 标记排列失效。通常由测量完成但排列未执行，或对齐方式改变触发。
+    /// </summary>
+    protected void InvalidateArrange()
+    {
+        if (!IsArrangeValid)
+            return;
+
+        IsArrangeValid = false;
+    }
 
     /// <summary>
     /// 公共排列入口。

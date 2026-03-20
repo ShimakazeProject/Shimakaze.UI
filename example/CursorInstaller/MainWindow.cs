@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 
 using Shimakaze.UI;
 using Shimakaze.UI.Core;
@@ -14,6 +14,7 @@ using SkiaSharp;
 
 sealed class MainWindow : PlatformWindow
 {
+
     private const float DAMPING = 8.0f;  // 阻尼系数（单位：1/秒），典型值 6~12
 
     private const float Degrees = -60;
@@ -212,7 +213,8 @@ sealed class MainWindow : PlatformWindow
                     StartX,
                     y + (_cursorHeight / 2) + _descentLeft,
                     TextAlign.Right,
-                    _fontLeftSide);
+                    _fontLeftSide
+                  );
 
                 frames.Draw(renderer, StartX, y, _cursorWidth);
 
@@ -221,7 +223,8 @@ sealed class MainWindow : PlatformWindow
                     StartX + _cursorWidth * 17,
                     y + (_cursorHeight / 2) + _descentRight,
                     TextAlign.Left,
-                    _fontRightSide);
+                    _fontRightSide
+                  );
             }
 
             y += _cursorHeight;

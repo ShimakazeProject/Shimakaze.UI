@@ -12,20 +12,22 @@ public static class RendererExtensions
 {
     private static readonly Lazy<SKPaint> DefaultPaint = new(() => new()
     {
-        Color = SKColors.White,
+        Color = SKColors.Black,
         IsAntialias = true,
         IsDither = false,
     });
 
-    public static Renderer DrawText(this Renderer renderer, string text, PointF point, TextAlign textAlign = TextAlign.Left, Font? font = default, SKPaint? paint = default)
+    public static Renderer DrawText(this Renderer renderer, string text, RectangleF rect, TextAlign textAlign = TextAlign.Left, Font? font = default, SKPaint? paint = default)
     {
+        using var clip = renderer.ClipRect(rect);
+
+        var size = FontManager.Measure(text, font);
         paint ??= DefaultPaint.Value;
-        point = renderer.FixPosition(point);
-        renderer.Canvas.DrawShapedText(
+        clip.Canvas.DrawShapedText(
             FontManager.GetShaper(font),
             text,
-            point.X,
-            point.Y,
+            0,
+            size.Height,
             textAlign.ToSkia(),
             FontManager.GetFont(font),
             paint
@@ -33,6 +35,4 @@ public static class RendererExtensions
 
         return renderer;
     }
-    public static Renderer DrawText(this Renderer renderer, string text, float x, float y, TextAlign textAlign = TextAlign.Left, Font? font = default, SKPaint? paint = default)
-        => renderer.DrawText(text, new PointF(x, y), textAlign, font, paint);
 }

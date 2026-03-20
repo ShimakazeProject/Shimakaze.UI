@@ -1,4 +1,8 @@
-﻿using SkiaSharp;
+using System.Drawing;
+
+using Shimakaze.UI.Rendering.Extensions;
+
+using SkiaSharp;
 using SkiaSharp.HarfBuzz;
 
 namespace Shimakaze.UI.Fonts;
@@ -26,6 +30,7 @@ public static class FontManager
 
         return fontstyle;
     }
+
     public static SKTypeface GetTypeface(Font? font = default, SKFontStyle? fontStyle = default)
     {
         if (font is null)
@@ -78,5 +83,12 @@ public static class FontManager
         }
 
         return skFont;
+    }
+
+    public static RectangleF Measure(string text, Font? font = null)
+    {
+        var skfont = FontManager.GetFont(font);
+        skfont.MeasureText(text, out var bounds);
+        return bounds.ToDrawing();
     }
 }

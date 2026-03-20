@@ -3,11 +3,15 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using Shimakaze.UI;
 using Shimakaze.UI.Controls;
 using Shimakaze.UI.Core;
 using Shimakaze.UI.Fonts;
+using Shimakaze.UI.Media;
 using Shimakaze.UI.Rendering;
 using Shimakaze.UI.Rendering.Extensions;
+
+using SkiaSharp;
 
 var builder = Host.CreateShimakazeUIApplicationBuilder(args);
 builder.Services.UseGlfw();
@@ -22,11 +26,21 @@ sealed class MainWindow : Window
 {
     public MainWindow()
     {
+        using var fs = File.OpenRead(@"");
+        var image = SKImage.FromEncodedData(fs);
         Content = new ChildrenElement()
         {
             Children =
             {
                 new ColorPanel(),
+                new Image()
+                {
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    ImageSource = new SkiaImageSource(image),
+                    Width = 256,
+                    Height = 384,
+                },
                 new TextBlock()
                 {
                     Text = "Hello",

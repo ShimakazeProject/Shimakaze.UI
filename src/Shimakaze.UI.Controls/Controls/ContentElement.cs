@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 
 using Shimakaze.UI.Rendering;
 
@@ -16,13 +16,25 @@ public class ContentElement : UIElement
         new PropertyMetadata()
     );
 
-    /// <summary>
-    /// 获取或设置元素的宽度。
-    /// </summary>
     public UIElement? Content
     {
-        get => (UIElement?)GetValue(ContentProperty)!;
-        set => SetValue(ContentProperty, value);
+        get => (UIElement?)GetValue(ContentProperty);
+        set
+        {
+            value?.Parent = this;
+            value?.VisualParentChanged += ContentElement_VisualParentChanged;
+            SetValue(ContentProperty, value);
+        }
+    }
+
+    private void ContentElement_VisualParentChanged(Visual sender, EventArgs eventArgs)
+    {
+        if (sender.Parent == this)
+            return;
+
+        sender.VisualParentChanged -= ContentElement_VisualParentChanged;
+        if (sender == Content)
+            Content = null;
     }
 
     protected internal override void OnInitialize()

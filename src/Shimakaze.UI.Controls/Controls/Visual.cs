@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 
 using Shimakaze.UI.Rendering;
 
@@ -156,12 +156,13 @@ public abstract class Visual : DependencyObject
 
     #endregion
 
+    public event UIEventHandler<Visual, EventArgs>? VisualParentChanged;
+
     /// <summary>
     /// 当父级可视化对象更改时调用。
     /// </summary>
-    protected virtual void OnVisualParentChanged()
-    {
-    }
+    protected virtual void OnVisualParentChanged() 
+        => VisualParentChanged?.Invoke(this, EventArgs.Empty);
 
 
     public event UIEventHandler<Visual, RenderEventArgs>? Render;

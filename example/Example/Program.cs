@@ -31,6 +31,7 @@ sealed class MainWindow : Window
                 {
                     Text = "Hello",
                     Font = Font.FromFamilyName("Microsoft YaHei UI", 16),
+                    Margin = new(24,16)
                 },
             },
         };

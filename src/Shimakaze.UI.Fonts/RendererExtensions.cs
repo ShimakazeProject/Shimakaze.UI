@@ -23,11 +23,12 @@ public static class RendererExtensions
 
         var size = FontManager.Measure(text, font);
         paint ??= DefaultPaint.Value;
+        var point = clip.FixPosition(rect.X, rect.Y + size.Height);
         clip.Canvas.DrawShapedText(
             FontManager.GetShaper(font),
             text,
-            0,
-            size.Height,
+            point.X,
+            point.Y,
             textAlign.ToSkia(),
             FontManager.GetFont(font),
             paint

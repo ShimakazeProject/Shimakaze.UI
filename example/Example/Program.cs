@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 
 using Shimakaze.UI.Controls;
 using Shimakaze.UI.Core;
+using Shimakaze.UI.Fonts;
 using Shimakaze.UI.Rendering;
 using Shimakaze.UI.Rendering.Extensions;
 
@@ -21,8 +22,18 @@ sealed class MainWindow : Window
 {
     public MainWindow()
     {
-        ColorPanel element = new();
-        Content = element;
+        Content = new ChildrenElement()
+        {
+            Children =
+            {
+                new ColorPanel(),
+                new TextBlock()
+                {
+                    Text = "Hello",
+                    Font = Font.FromFamilyName("Microsoft YaHei UI", 16),
+                },
+            },
+        };
     }
 
     protected override void OnInitialize()

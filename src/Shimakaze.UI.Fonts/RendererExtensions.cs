@@ -19,7 +19,7 @@ public static class RendererExtensions
 
     public static Renderer DrawText(this Renderer renderer, string text, RectangleF rect, TextAlign textAlign = TextAlign.Left, Font? font = default, SKPaint? paint = default)
     {
-        using var clip = renderer.ClipRect(rect);
+        using var clip = renderer.FixedClipRect(rect);
 
         var size = FontManager.Measure(text, font);
         paint ??= DefaultPaint.Value;

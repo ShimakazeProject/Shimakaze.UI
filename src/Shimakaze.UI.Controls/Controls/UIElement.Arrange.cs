@@ -1,4 +1,4 @@
-﻿
+
 using System.Drawing;
 
 namespace Shimakaze.UI.Controls;
@@ -154,12 +154,26 @@ public partial class UIElement
         }
         // Top 不需要额外计算
 
-        // 6. 更新 ref 参数，返回最终确定的矩形
-        // 这就是子类（如 Panel）在排列子元素时应该依赖的边界，
-        // 也是绘制系统最终用来裁剪绘制的边界。
-        finalRect = new RectangleF(finalX, finalY, finalWidth, finalHeight);
+        // 6. 计算包含所有父级偏移的绝对坐标
+        // 遍历父级链，累加所有父级的 RenderRect 偏移
+        float parentOffsetX = 0;
+        float parentOffsetY = 0;
+        var currentParent = Parent as UIElement;
+        while (currentParent != null)
+        {
+            if (currentParent.IsArrangeValid)
+            {
+                parentOffsetX += currentParent.RenderRect.X;
+                parentOffsetY += currentParent.RenderRect.Y;
+            }
+            currentParent = currentParent.Parent as UIElement;
+        }
 
-        // 7. 【扩展点】如果有子元素，子类应在此处遍历并调用 child.Arrange()
+        // 7. 更新 ref 参数，返回最终确定的矩形（包含父级偏移的绝对坐标）
+        // RenderRect 现在存储的是包含所有父级偏移的绝对坐标
+        finalRect = new RectangleF(finalX + parentOffsetX, finalY + parentOffsetY, finalWidth, finalHeight);
+
+        // 8. 【扩展点】如果有子元素，子类应在此处遍历并调用 child.Arrange()
         // 例如：
         // if (this is Panel panel)
         // {

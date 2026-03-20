@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 
 namespace Shimakaze.UI.Controls;
 
@@ -280,7 +280,7 @@ public partial class UIElement : Visual
     /// <summary>
     /// 触发 MouseDown 事件（隧道 + 冒泡）。
     /// </summary>
-    protected virtual void OnMouseDown()
+    protected internal virtual void OnMouseDown()
     {
         // 先触发隧道事件（从根到源）
         RaiseTunnelEvent(new RoutedEventArgs(PreviewMouseDownEvent, this));
@@ -293,7 +293,7 @@ public partial class UIElement : Visual
     /// <summary>
     /// 触发 MouseUp 事件（隧道 + 冒泡）。
     /// </summary>
-    protected virtual void OnMouseUp()
+    protected internal virtual void OnMouseUp()
     {
         // 先触发隧道事件（从根到源）
         RaiseTunnelEvent(new RoutedEventArgs(PreviewMouseUpEvent, this));
@@ -306,7 +306,7 @@ public partial class UIElement : Visual
     /// <summary>
     /// 触发 MouseMove 事件（隧道 + 冒泡）。
     /// </summary>
-    protected virtual void OnMouseMove()
+    protected internal virtual void OnMouseMove()
     {
         // 先触发隧道事件（从根到源）
         RaiseTunnelEvent(new RoutedEventArgs(PreviewMouseMoveEvent, this));
@@ -319,7 +319,7 @@ public partial class UIElement : Visual
     /// <summary>
     /// 触发 Click 事件（隧道 + 冒泡）。
     /// </summary>
-    protected virtual void OnClick()
+    protected internal virtual void OnClick()
     {
         // 先触发隧道事件（从根到源）
         RaiseTunnelEvent(new RoutedEventArgs(PreviewClickEvent, this));
@@ -332,7 +332,7 @@ public partial class UIElement : Visual
     /// <summary>
     /// 触发 GotFocus 事件（隧道 + 冒泡）。
     /// </summary>
-    protected virtual void OnGotFocus()
+    protected internal virtual void OnGotFocus()
     {
         // 先触发隧道事件（从根到源）
         RaiseTunnelEvent(new RoutedEventArgs(PreviewGotFocusEvent, this));
@@ -345,7 +345,7 @@ public partial class UIElement : Visual
     /// <summary>
     /// 触发 LostFocus 事件（隧道 + 冒泡）。
     /// </summary>
-    protected virtual void OnLostFocus()
+    protected internal virtual void OnLostFocus()
     {
         // 先触发隧道事件（从根到源）
         RaiseTunnelEvent(new RoutedEventArgs(PreviewLostFocusEvent, this));

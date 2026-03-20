@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Numerics;
 
 using Shimakaze.UI.Rendering.Extensions;
@@ -108,6 +108,7 @@ public abstract class Renderer(SKSurface surface) : IDisposable
     #endregion
 
     public ClippedRenderer ClipRect(RectangleF rect) => new(this, rect);
+    public FixedClippedRenderer FixedClipRect(RectangleF rect) => new(this, rect);
 
     public abstract void Dispose();
 }

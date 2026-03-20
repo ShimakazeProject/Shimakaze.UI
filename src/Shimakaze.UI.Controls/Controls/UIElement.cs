@@ -260,7 +260,7 @@ public partial class UIElement : Visual
     /// </summary>
     /// <param name="point">测试点</param>
     /// <returns>如果点在元素内则返回 true，否则返回 false</returns>
-    public override bool HitTest(PointF point) =>
+    public override bool HitTest(in PointF point) =>
         IsEnabled &&
         Visibility == Visibility.Visible &&
         RenderBounds.Contains(point);
@@ -270,7 +270,7 @@ public partial class UIElement : Visual
     /// </summary>
     /// <param name="point">测试点</param>
     /// <returns>命中的元素，如果没有命中则返回 null</returns>
-    public virtual UIElement? HitTestElement(PointF point) =>
+    public virtual UIElement? HitTestElement(in PointF point) =>
         HitTest(point) ? this : null;
 
     #endregion

@@ -49,4 +49,15 @@ public class ChildrenElement : UIElement
         foreach (var item in Children)
             item?.Arrange(finalRect);
     }
+
+    public override UIElement? HitTestElement(in PointF point)
+    {
+        foreach (var item in Children)
+        {
+            if (item?.HitTestElement(point) is { } e)
+                return e;
+        }
+
+        return base.HitTestElement(point);
+    }
 }

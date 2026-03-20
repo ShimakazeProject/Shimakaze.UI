@@ -68,4 +68,7 @@ public class ContentElement : UIElement
         base.ArrangeCore(ref finalRect);
         Content?.Arrange(finalRect);
     }
+
+    public override UIElement? HitTestElement(in PointF point)
+        => Content?.HitTestElement(point) ?? base.HitTestElement(point);
 }

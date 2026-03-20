@@ -1,7 +1,10 @@
-﻿
+
 using System.Drawing;
 
 using Shimakaze.UI.Core;
+using Shimakaze.UI.Input;
+using Shimakaze.UI.Input.EventArgs;
+using Shimakaze.UI.Rendering.Extensions;
 
 namespace Shimakaze.UI.Controls;
 
@@ -16,6 +19,16 @@ public class Window : ContentElement, IPlatformWindowWrap, IDisposable
         _window.Update += OnUpdate;
         _window.Render += OnRender;
         _window.Resize += OnResize;
+        _window.Input.MouseClick += Input_MouseClick;
+    }
+
+    private void Input_MouseClick(InputManager sender, MouseClickEventArgs eventArgs)
+    {
+        if (Content is null)
+            return;
+
+        var element = Content.HitTestElement(eventArgs.Position.ToDrawingPoint());
+        element?.OnClick();
     }
 
     private void OnResize(PlatformWindow sender, WindowResizeEventArgs eventArgs)

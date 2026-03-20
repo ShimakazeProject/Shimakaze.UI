@@ -152,7 +152,7 @@ public abstract class Visual : DependencyObject
     /// </summary>
     /// <param name="point">测试点</param>
     /// <returns>如果点在元素内则返回 true，否则返回 false</returns>
-    public virtual bool HitTest(PointF point) => IsVisible && RenderBounds.Contains(point);
+    public virtual bool HitTest(in PointF point) => IsVisible && RenderBounds.Contains(point);
 
     #endregion
 

@@ -3,7 +3,7 @@ using System.Drawing;
 
 using Shimakaze.UI.Core;
 
-namespace Shimakaze.UI;
+namespace Shimakaze.UI.Controls;
 
 public class Window : ContentElement, IPlatformWindowWrap, IDisposable
 {
@@ -53,7 +53,7 @@ public class Window : ContentElement, IPlatformWindowWrap, IDisposable
             }
         }
 
-        OnUpdate( eventArgs.DeltaTime);
+        OnUpdate(eventArgs.DeltaTime);
     }
 
     protected virtual void OnInitialize(PlatformWindow sender, EventArgs eventArgs)

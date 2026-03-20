@@ -3,7 +3,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using Shimakaze.UI;
+using Shimakaze.UI.Controls;
 using Shimakaze.UI.Core;
 using Shimakaze.UI.Rendering;
 using Shimakaze.UI.Rendering.Extensions;

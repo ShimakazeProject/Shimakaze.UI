@@ -3,7 +3,7 @@
 using Shimakaze.UI.Core;
 using Shimakaze.UI.Rendering;
 
-namespace Shimakaze.UI;
+namespace Shimakaze.UI.Controls;
 
 /// <summary>
 /// 提供渲染支持、命中测试和坐标转换功能的基类。

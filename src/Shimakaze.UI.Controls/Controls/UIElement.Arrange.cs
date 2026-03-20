@@ -1,7 +1,7 @@
 ﻿
 using System.Drawing;
 
-namespace Shimakaze.UI;
+namespace Shimakaze.UI.Controls;
 
 public partial class UIElement
 {
@@ -86,7 +86,7 @@ public partial class UIElement
         // 1. 基础数据准备
         float availableWidth = finalRect.Width;
         float availableHeight = finalRect.Height;
-        
+
         // 获取测量阶段计算出的期望大小
         float desiredWidth = DesiredSize.Width;
         float desiredHeight = DesiredSize.Height;
@@ -170,7 +170,7 @@ public partial class UIElement
         //     }
         // }
     }
-    
+
     /// <summary>
     /// 获取元素的渲染边界（包含 Margin 的外部边界）。
     /// 基于最新的 Arrange 结果计算。

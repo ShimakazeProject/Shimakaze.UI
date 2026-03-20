@@ -1,9 +1,8 @@
 ﻿using System.Drawing;
 
 using Shimakaze.UI.Core;
-using Shimakaze.UI.Rendering;
 
-namespace Shimakaze.UI;
+namespace Shimakaze.UI.Controls;
 
 /// <summary>
 /// 表示用户界面 (UI) 元素的基类，提供交互功能和路由事件支持。

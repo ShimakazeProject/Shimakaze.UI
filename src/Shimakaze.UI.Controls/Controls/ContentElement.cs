@@ -2,7 +2,7 @@
 
 using Shimakaze.UI.Rendering;
 
-namespace Shimakaze.UI;
+namespace Shimakaze.UI.Controls;
 
 public class ContentElement : UIElement
 {

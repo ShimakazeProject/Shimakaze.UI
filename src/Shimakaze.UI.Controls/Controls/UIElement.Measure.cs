@@ -1,7 +1,7 @@
 ﻿
 using System.Drawing;
 
-namespace Shimakaze.UI;
+namespace Shimakaze.UI.Controls;
 
 public partial class UIElement
 {

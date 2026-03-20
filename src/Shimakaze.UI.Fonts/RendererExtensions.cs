@@ -1,15 +1,16 @@
 using System.Drawing;
 
+using Shimakaze.UI.Fonts;
 using Shimakaze.UI.Rendering;
 
 using SkiaSharp;
 using SkiaSharp.HarfBuzz;
 
-namespace Shimakaze.UI.Fonts;
+namespace Shimakaze.UI;
 
 public static class RendererExtensions
 {
-    private static readonly Lazy<SKPaint> s_defaultPaint = new(() => new()
+    private static readonly Lazy<SKPaint> DefaultPaint = new(() => new()
     {
         Color = SKColors.White,
         IsAntialias = true,
@@ -18,7 +19,7 @@ public static class RendererExtensions
 
     public static Renderer DrawText(this Renderer renderer, string text, PointF point, TextAlign textAlign = TextAlign.Left, Font? font = default, SKPaint? paint = default)
     {
-        paint ??= s_defaultPaint.Value;
+        paint ??= DefaultPaint.Value;
         point = renderer.FixPosition(point);
         renderer.Canvas.DrawShapedText(
             FontManager.GetShaper(font),

@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <RootNamespace>Shimakaze.UI</RootNamespace>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="SkiaSharp.HarfBuzz" />
   </ItemGroup>

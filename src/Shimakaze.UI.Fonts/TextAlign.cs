@@ -1,6 +1,6 @@
 using SkiaSharp;
 
-namespace Shimakaze.UI.Fonts;
+namespace Shimakaze.UI;
 
 public enum TextAlign
 {

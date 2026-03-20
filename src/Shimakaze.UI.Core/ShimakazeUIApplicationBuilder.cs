@@ -5,9 +5,10 @@ using Microsoft.Extensions.Diagnostics.Metrics;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using Shimakaze.UI.Core;
 using Shimakaze.UI.Core.Threading;
 
-namespace Shimakaze.UI.Core;
+namespace Shimakaze.UI;
 
 /// <inheritdoc cref="HostApplicationBuilder" />
 public sealed class ShimakazeUIApplicationBuilder : IHostApplicationBuilder
@@ -58,6 +59,10 @@ public sealed class ShimakazeUIApplicationBuilder : IHostApplicationBuilder
 
         Services.TryAddSingleton<WindowManager>();
 
-        return new(Services.BuildServiceProvider());
+        var serviceProvider = Services.BuildServiceProvider();
+
+        var app = ActivatorUtilities.CreateInstance<Application>(serviceProvider);
+
+        return app;
     }
 }

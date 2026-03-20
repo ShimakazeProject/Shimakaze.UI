@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System.Drawing;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
 
@@ -48,7 +50,7 @@ public partial class PlatformWindow : IDisposable
         Native.Load += OnInitialize;
         Native.Update += OnUpdate;
         Native.Render += OnRender;
-        Application.Instance.WindowManager.Register(this);
+        Application.Instance.Services.GetRequiredService<WindowManager>().Register(this);
     }
 
     protected virtual void OnMove(Vector2D<int> position)

@@ -1,9 +1,8 @@
 using Silk.NET.Windowing;
 
-
 namespace Shimakaze.UI.Core;
 
-public interface PlatformWindowOptionsProvider
+public interface IPlatformWindowOptionsProvider
 {
     WindowOptions CreateOptions();
 }

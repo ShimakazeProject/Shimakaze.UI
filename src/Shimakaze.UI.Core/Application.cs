@@ -2,44 +2,44 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using Shimakaze.UI.Core;
 using Shimakaze.UI.Core.Threading;
 
 using Silk.NET.Windowing;
 
-namespace Shimakaze.UI.Core;
+namespace Shimakaze.UI;
 
 public sealed class Application : IHost
 {
-    private bool _disposedValue;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-
-    private readonly PlatformWindowOptionsProvider _windowOptionsProvider;
-    private readonly PlatformWindowProvider _windowProvider;
+    private readonly IPlatformWindowOptionsProvider _windowOptionsProvider;
+    private readonly IPlatformWindowProvider _windowProvider;
     private readonly IHostApplicationLifetime _lifetime;
+    private readonly Dispatcher _dispatcher;
+    private readonly WindowManager _windowManager;
 
-    public static Application Instance { get; private set; } = default!;
-
-    public WindowManager WindowManager { get; }
-    public Dispatcher Dispatcher { get; }
-    public IServiceProvider Services { get; }
-    public ILogger Logger { get; }
-
-    public Application(IServiceProvider serviceProvider)
+    public Application(
+        IServiceProvider serviceProvider,
+        IPlatformWindowOptionsProvider windowOptionsProvider,
+        IPlatformWindowProvider windowProvider,
+        IHostApplicationLifetime lifetime,
+        Dispatcher dispatcher,
+        WindowManager windowManager)
     {
         if (Instance is not null)
             throw new InvalidOperationException("Application is already initialized.");
 
         Instance = this;
+        _windowOptionsProvider = windowOptionsProvider;
+        _windowProvider = windowProvider;
+        _lifetime = lifetime;
+        _dispatcher = dispatcher;
+        _windowManager = windowManager;
         Services = serviceProvider;
-
-        _windowOptionsProvider = serviceProvider.GetRequiredService<PlatformWindowOptionsProvider>();
-        _windowProvider = serviceProvider.GetRequiredService<PlatformWindowProvider>();
-        _lifetime = serviceProvider.GetRequiredService<IHostApplicationLifetime>();
-        Logger = serviceProvider.GetRequiredService<ILogger<Application>>();
-        Dispatcher = serviceProvider.GetRequiredService<Dispatcher>();
-        WindowManager = serviceProvider.GetRequiredService<WindowManager>();
     }
 
+    public static Application Instance { get; private set; } = default!;
+    public IServiceProvider Services { get; }
 
     internal IWindow CreateNativeWindow()
         => _windowProvider.CreateWindow(
@@ -48,19 +48,19 @@ public sealed class Application : IHost
     private void MainLoop()
     {
         // 初始化 Windowing 运行时（如 GLFW）
-        WindowManager.Initialize();
+        _windowManager.Initialize();
 
         while (!_lifetime.ApplicationStopping.IsCancellationRequested)
         {
-            if (Dispatcher.Dequeue(out var task))
+            if (_dispatcher.Dequeue(out var task))
                 task.Invoke();
 
             // 如果没有窗口且允许自动退出，则退出
-            if (WindowManager.IsEmpty)
+            if (_windowManager.IsEmpty)
                 break;
 
             // 2. 处理窗口事件和渲染
-            WindowManager.Update();
+            _windowManager.Update();
 
             Thread.Yield();
         }
@@ -73,7 +73,7 @@ public sealed class Application : IHost
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.Register(_cancellationTokenSource.Cancel);
-        Dispatcher.Start(MainLoop);
+        _dispatcher.Start(MainLoop);
         return Task.CompletedTask;
     }
 
@@ -87,7 +87,7 @@ public sealed class Application : IHost
                 {
                     while (!cancellationToken.IsCancellationRequested)
                     {
-                        if (Dispatcher.Wait(TimeSpan.FromSeconds(1)))
+                        if (_dispatcher.Wait(TimeSpan.FromSeconds(1)))
                             break;
                     }
                 },
@@ -96,32 +96,7 @@ public sealed class Application : IHost
         );
     }
 
-    private void Dispose(bool disposing)
-    {
-        if (_disposedValue)
-            return;
-
-        if (disposing)
-        {
-            // TODO: 释放托管状态(托管对象)
-        }
-
-        // TODO: 释放未托管的资源(未托管的对象)并重写终结器
-        // TODO: 将大型字段设置为 null
-        _disposedValue = true;
-    }
-
-    // TODO: 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
-    // ~Application()
-    // {
-    //     // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
-    //     Dispose(disposing: false);
-    // }
-
     public void Dispose()
     {
-        // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 }

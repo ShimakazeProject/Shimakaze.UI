@@ -1,6 +1,6 @@
 using Silk.NET.Maths;
 
-namespace Shimakaze.UI.Core;
+namespace Shimakaze.UI;
 
 public sealed class WindowMoveEventArgs(Vector2D<int> newPosition) : EventArgs
 {

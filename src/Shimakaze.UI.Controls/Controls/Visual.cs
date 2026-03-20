@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 
-using Shimakaze.UI.Core;
 using Shimakaze.UI.Rendering;
 
 namespace Shimakaze.UI.Controls;

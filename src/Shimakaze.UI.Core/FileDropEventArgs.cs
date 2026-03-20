@@ -1,7 +1,7 @@
 
 using System.Collections.Immutable;
 
-namespace Shimakaze.UI.Core;
+namespace Shimakaze.UI;
 
 public sealed class FileDropEventArgs(string[] filePaths) : EventArgs
 {

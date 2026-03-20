@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 
+using Shimakaze.UI;
 using Shimakaze.UI.Core;
 using Shimakaze.UI.Fonts;
 using Shimakaze.UI.Input;

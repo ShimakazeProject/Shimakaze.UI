@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-namespace Shimakaze.UI.Core;
+namespace Shimakaze.UI;
 
 public sealed class ShimakazeUIApplicationBuilderSettings
 {

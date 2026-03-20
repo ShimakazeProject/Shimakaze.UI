@@ -13,20 +13,20 @@ public static class DependencyInjectionExtensions
     public static IServiceCollection UseWindowProvider
         <[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TWindowProvider>(
         this IServiceCollection services)
-        where TWindowProvider : class, PlatformWindowProvider
+        where TWindowProvider : class, IPlatformWindowProvider
     {
         services.TryAddSingleton<TWindowProvider>();
-        services.TryAddSingleton<PlatformWindowProvider>(provider => provider.GetRequiredService<TWindowProvider>());
+        services.TryAddSingleton<IPlatformWindowProvider>(provider => provider.GetRequiredService<TWindowProvider>());
         return services;
     }
 
     public static IServiceCollection UseWindowOptionsProvider
         <[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TWindowOptionsProvider>(
         this IServiceCollection services)
-        where TWindowOptionsProvider : class, PlatformWindowOptionsProvider
+        where TWindowOptionsProvider : class, IPlatformWindowOptionsProvider
     {
         services.TryAddSingleton<TWindowOptionsProvider>();
-        services.TryAddSingleton<PlatformWindowOptionsProvider>(provider => provider.GetRequiredService<TWindowOptionsProvider>());
+        services.TryAddSingleton<IPlatformWindowOptionsProvider>(provider => provider.GetRequiredService<TWindowOptionsProvider>());
         return services;
     }
 

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 using Shimakaze.UI.Rendering;
 
@@ -10,8 +10,8 @@ public static class ApplicationExtensions
 {
     extension(Application application)
     {
-        public IRendererProvider RendererProvider
-            => application.Services.GetRequiredService<IRendererProvider>();
+        public RendererProvider RendererProvider
+            => application.Services.GetRequiredService<RendererProvider>();
 
         public static BaseRenderer GetRenderer(PlatformWindow window)
             => Application.Instance.RendererProvider.GetRenderer(window);

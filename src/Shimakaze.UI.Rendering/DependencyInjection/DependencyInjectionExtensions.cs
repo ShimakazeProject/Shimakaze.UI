@@ -12,22 +12,30 @@ namespace Microsoft.Extensions.DependencyInjection;
 public static class DependencyInjectionExtensions
 {
     public static IServiceCollection UseRendererProvider
-        <[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TRendererProvider>(
-        this IServiceCollection services)
-        where TRendererProvider : class, IRendererProvider
+        <[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TSurfaceProviderFactory>(this IServiceCollection services)
+        where TSurfaceProviderFactory : class, ISurfaceProviderFactory
     {
-        services.TryAddSingleton<TRendererProvider>();
-        if (typeof(TRendererProvider).IsAssignableTo(typeof(RendererProvider)))
-        {
-            services.TryAddSingleton<RendererProvider>(provider =>
-            {
-                var result = provider.GetRequiredService<TRendererProvider>() as RendererProvider;
-                Debug.Assert(result is not null);
-                return result;
-            });
-        }
+        services.TryAddSingleton<RendererProvider>();
 
-        services.TryAddSingleton<IRendererProvider>(provider => provider.GetRequiredService<TRendererProvider>());
+        services.TryAddSingleton<TSurfaceProviderFactory>();
+
+        services.TryAddSingleton<ISurfaceProviderFactory>(provider => provider.GetRequiredService<TSurfaceProviderFactory>());
+
+        return services;
+    }
+
+    public static IServiceCollection UseRendererProvider
+        <[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TSurfaceProviderFactory>(
+        this IServiceCollection services,
+        Func<IServiceProvider, TSurfaceProviderFactory> factory)
+        where TSurfaceProviderFactory : class, ISurfaceProviderFactory
+    {
+        services.TryAddSingleton<RendererProvider>();
+
+        services.TryAddSingleton(factory);
+
+        services.TryAddSingleton<ISurfaceProviderFactory>(provider => provider.GetRequiredService<TSurfaceProviderFactory>());
+
         return services;
     }
 }

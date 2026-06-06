@@ -1,4 +1,6 @@
-﻿using Shimakaze.UI.Core;
+﻿using System.Collections.Concurrent;
+
+using Shimakaze.UI.Core;
 
 using Silk.NET.Windowing;
 
@@ -6,13 +8,21 @@ using SkiaSharp;
 
 namespace Shimakaze.UI.Rendering;
 
-public abstract class RendererProvider : IRendererProvider
+public sealed class RendererProvider(ISurfaceProviderFactory rendererContextProvider)
 {
-    public virtual BaseRenderer GetRenderer(PlatformWindow window)
+    private readonly ConcurrentDictionary<IWindow, ISurfaceProvider> _cache = [];
+    public BaseRenderer GetRenderer(PlatformWindow window)
         => new(GetSurface(window.Native));
 
-    public virtual SKSurface GetSurface(PlatformWindow window)
+    public SKSurface GetSurface(PlatformWindow window)
         => GetSurface(window.Native);
 
-    protected abstract SKSurface GetSurface(IWindow window);
+    private SKSurface GetSurface(IWindow window)
+    {
+        var context = _cache.GetOrAdd(window, rendererContextProvider.Create);
+        if (context.IsInvalid())
+            context.EnsureCreated();
+
+        return context.Surface;
+    }
 }

@@ -2,7 +2,7 @@
 
 namespace Shimakaze.UI.Rendering;
 
-public interface ISurfaceProvider
+public interface ISurfaceProvider : IDisposable
 {
     SKSurface Begin();
 

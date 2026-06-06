@@ -42,13 +42,16 @@ internal sealed class OpenGLSurfaceProvider(IWindow window) : ISurfaceProvider
         _gl ??= window.CreateOpenGL();
         Debug.Assert(_gl is not null);
 
-        if (_gRContext is null)
+        if (_gRContext is not { IsAbandoned: false })
         {
-            s_globalContext ??= GRContext.CreateGl();
-            s_globalContext ??= GRContext.CreateGl(GRGlInterface.Create());
+            if (s_globalContext is not { IsAbandoned: false })
+                s_globalContext = GRContext.CreateGl();
+            if (s_globalContext is not { IsAbandoned: false })
+                s_globalContext = GRContext.CreateGl(GRGlInterface.Create());
+
             _gRContext = s_globalContext;
-            _gRContext ??= GRContext.CreateGl(
-                GRGlInterface.CreateOpenGl(name => _gl.Context.GetProcAddress(name)));
+            if (_gRContext is not { IsAbandoned: false })
+                _gRContext = GRContext.CreateGl(GRGlInterface.CreateOpenGl(name => _gl.Context.GetProcAddress(name)));
         }
         Debug.Assert(_gRContext is not null);
 

@@ -33,6 +33,7 @@ sealed class MainWindow : Window
             Children =
             {
                 new ColorPanel(),
+                new FPSCounter(),
                 new Image()
                 {
                     HorizontalAlignment = HorizontalAlignment.Center,
@@ -60,14 +61,41 @@ sealed class MainWindow : Window
     }
 }
 
-sealed class ColorPanel : UIElement
+sealed class FPSCounter : UIElement
 {
-    private int _h;
+    private int _frameCount = 0;
+    private double _timeAccumulator = 0f;
+    private double _currentFps = 0f;
+
     protected override void OnRender(Renderer renderer, double deltaTime)
     {
-        renderer.Clear(Color.FromHsv(_h, 100, 100));
-        _h++;
-        if (_h > 360)
-            _h = 0;
+        _frameCount++;
+        _timeAccumulator += deltaTime;
+
+        // 当累计时间达到 1s (1秒) 时，计算一次 FPS
+        if (_timeAccumulator >= 1.0f)
+        {
+            _currentFps = (_frameCount * 1.0f) / _timeAccumulator;
+
+            // 重置计数器和时间累加器
+            _frameCount = 0;
+            _timeAccumulator = 0f;
+        }
+
+        renderer.DrawText(_currentFps.ToString(), RenderRect);
+
+        base.OnRender(renderer, deltaTime);
+    }
+}
+
+sealed class ColorPanel : UIElement
+{
+    private double _time;
+    protected override void OnRender(Renderer renderer, double deltaTime)
+    {
+        renderer.Clear(Color.FromHsv((int)double.Floor(_time / 6 * 360), 100, 100));
+        _time += deltaTime;
+        if (_time > 6)
+            _time -= 6;
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -18,25 +17,13 @@ internal sealed class OpenGLSurfaceProvider(IWindow window) : ISurfaceProvider
     private GRBackendRenderTarget? _gRBackendRenderTarget;
     private Vector2D<int> _framebufferSize;
 
-    public SKSurface? Surface { get; private set; }
+    private SKSurface? _surface;
 
-    [MemberNotNullWhen(
-        false,
-        nameof(_gl),
-        nameof(_gRContext),
-        nameof(_gRGlFramebufferInfo),
-        nameof(_gRBackendRenderTarget),
-        nameof(Surface))]
-    public bool IsInvalid() => window.FramebufferSize != _framebufferSize;
-
-    [MemberNotNull(
-        nameof(_gl),
-        nameof(_gRContext),
-        nameof(_gRGlFramebufferInfo),
-        nameof(_gRBackendRenderTarget),
-        nameof(Surface))]
-    public void EnsureCreated()
+    public SKSurface Begin()
     {
+        if (_surface is not null && window.FramebufferSize == _framebufferSize)
+            return _surface;
+
         _framebufferSize = window.FramebufferSize;
 
         _gl ??= window.CreateOpenGL();
@@ -70,11 +57,19 @@ internal sealed class OpenGLSurfaceProvider(IWindow window) : ISurfaceProvider
         );
 
         // 创建 Skia 画布
-        Surface = SKSurface.Create(
+        _surface = SKSurface.Create(
             _gRContext,
             _gRBackendRenderTarget,
             GRSurfaceOrigin.BottomLeft,
             SKColorType.Rgba8888);
-        Debug.Assert(Surface is not null);
+        Debug.Assert(_surface is not null);
+
+        return _surface;
+    }
+
+    public void End()
+    {
+        if (!window.ShouldSwapAutomatically)
+            window.SwapBuffers();
     }
 }

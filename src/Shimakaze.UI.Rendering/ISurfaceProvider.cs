@@ -1,16 +1,10 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-using SkiaSharp;
+﻿using SkiaSharp;
 
 namespace Shimakaze.UI.Rendering;
 
 public interface ISurfaceProvider
 {
-    SKSurface? Surface { get; }
+    SKSurface Begin();
 
-    [MemberNotNullWhen(false, nameof(Surface))]
-    bool IsInvalid();
-
-    [MemberNotNull(nameof(Surface))]
-    void EnsureCreated();
+    void End();
 }

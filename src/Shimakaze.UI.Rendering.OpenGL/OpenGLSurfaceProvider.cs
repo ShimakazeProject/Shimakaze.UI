@@ -70,6 +70,7 @@ internal sealed class OpenGLSurfaceProvider(IWindow window) : ISurfaceProvider
 
     public void End()
     {
+        _grContext?.Submit();
         if (!window.ShouldSwapAutomatically)
             window.SwapBuffers();
     }

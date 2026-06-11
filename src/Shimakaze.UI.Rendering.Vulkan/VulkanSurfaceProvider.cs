@@ -1,8 +1,4 @@
-﻿using System.Drawing;
-using System.Runtime.CompilerServices;
-
-using Silk.NET.Maths;
-using Silk.NET.Vulkan;
+﻿using Silk.NET.Maths;
 using Silk.NET.Windowing;
 
 using SkiaSharp;

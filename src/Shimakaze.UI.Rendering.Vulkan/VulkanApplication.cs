@@ -453,7 +453,6 @@ internal sealed class VulkanApplication : IDisposable
     {
         var msg = SilkMarshal.PtrToString((nint)pCallbackData->PMessage, NativeStringEncoding.UTF8);
         Debug.WriteLine($"validation layer: {msg}");
-        Console.WriteLine($"validation layer: {msg}");
 
         return 0;
     }

@@ -28,9 +28,9 @@ internal sealed class VulkanWindow : IDisposable
     private Image[]? _swapChainImages;
     private Format _swapChainImageFormat;
     private Extent2D _swapChainExtent;
+    private SKSurface[]? _surfaces;
 
     private ImageLayout[]? _imageLayouts;
-    private SKSurface? _currentSurface;
     private uint _currentImageIndex;
     private int _currentFrameIndex;
 
@@ -109,8 +109,13 @@ internal sealed class VulkanWindow : IDisposable
 
     private unsafe void CleanupSwapChain()
     {
-        _currentSurface?.Dispose();
-        _currentSurface = null;
+        if (_surfaces is { Length: not 0 })
+        {
+            foreach (var item in _surfaces)
+                item.Dispose();
+
+            _surfaces = null;
+        }
 
         _imageLayouts = null;
 
@@ -190,8 +195,7 @@ internal sealed class VulkanWindow : IDisposable
         _swapChainImages = Utils.TwoStep<Image>((ref r, ref c) =>
             _khrSwapchain.GetSwapchainImages(_application.Device, _swapchain, ref c, out r).EnsureSuccessed());
 
-        _currentSurface?.Dispose();
-        _currentSurface = null;
+        _surfaces = new SKSurface[_swapChainImages.Length];
 
         _imageLayouts = new ImageLayout[_swapChainImages.Length];
         // All swapchain images start in Undefined layout
@@ -237,6 +241,7 @@ internal sealed class VulkanWindow : IDisposable
         Debug.Assert(_khrSwapchain is not null);
         Debug.Assert(_swapChainImages is not null);
         Debug.Assert(_imageLayouts is not null);
+        Debug.Assert(_surfaces is not null);
         Debug.Assert(!_application.GRContext.IsAbandoned);
         Debug.Assert(_application.Indices.IsComplete);
 
@@ -261,15 +266,15 @@ internal sealed class VulkanWindow : IDisposable
 
         if (acquireResult is Result.ErrorOutOfDateKhr)
         {
-            RecreateSwapChain();
-            // Retry once after recreation
-            acquireResult = _khrSwapchain.AcquireNextImage(
-                _application.Device,
-                _swapchain,
-                ulong.MaxValue,
-                _imageAvailableSemaphores[frame],
-                default,
-                ref imageIndex);
+           RecreateSwapChain();
+           // Retry once after recreation
+           acquireResult = _khrSwapchain.AcquireNextImage(
+               _application.Device,
+               _swapchain,
+               ulong.MaxValue,
+               _imageAvailableSemaphores[frame],
+               default,
+               ref imageIndex);
         }
 
         // VK_SUBOPTIMAL_KHR is still usable — just log and continue
@@ -304,11 +309,8 @@ internal sealed class VulkanWindow : IDisposable
         _application.Vk.QueueSubmit(_application.GraphicsQueue, 1, ref submitInfo, default)
             .EnsureSuccessed();
 
-        // 4. Dispose old surface (from previous frame) and create a fresh one.
-        //    Creating a new GRBackendRenderTarget + SKSurface each frame ensures
-        //    Skia's internal layout tracking matches reality — the surface's
-        //    ImageLayout reflects the actual layout right now (ColorAttachmentOptimal).
-        _currentSurface?.Dispose();
+        if (_surfaces[imageIndex] is { Handle: not 0 } surface)
+            return surface;
 
         GRVkAlloc alloc = new();
         GRVkImageInfo imageInfo = new()
@@ -331,16 +333,16 @@ internal sealed class VulkanWindow : IDisposable
             (int)_swapChainExtent.Width, (int)_swapChainExtent.Height, imageInfo);
         Debug.Assert(backendRenderTarget.IsValid);
 
-        _currentSurface = SKSurface.Create(
+        _surfaces[imageIndex] = surface = SKSurface.Create(
             _application.GRContext,
             backendRenderTarget,
             GRSurfaceOrigin.TopLeft,
             SKColorType.Bgra8888);
 
-        Debug.Assert(_currentSurface is not null);
+        Debug.Assert(surface is { Handle: not 0 });
         Debug.Assert(!_application.GRContext.IsAbandoned);
 
-        return _currentSurface;
+        return surface;
     }
 
     /// <summary>
@@ -475,11 +477,6 @@ internal sealed class VulkanWindow : IDisposable
             1, ref barrier);
 
         _application.Vk.EndCommandBuffer(_commandBuffer);
-    }
-
-    public unsafe void Destroy()
-    {
-        DisposeCore();
     }
 
     private unsafe void DisposeCore()

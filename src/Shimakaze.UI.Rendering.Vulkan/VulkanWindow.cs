@@ -11,7 +11,7 @@ using Semaphore = Silk.NET.Vulkan.Semaphore;
 
 namespace Shimakaze.UI.Rendering.Vulkan;
 
-internal sealed class VulkanWindow
+internal sealed class VulkanWindow : IDisposable
 {
     private const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -29,7 +29,15 @@ internal sealed class VulkanWindow
     private Format _swapChainImageFormat;
     private Extent2D _swapChainExtent;
 
-    private SKSurface[]? _surfaces;
+    private ImageLayout[]? _imageLayouts;
+    private SKSurface? _currentSurface;
+    private uint _currentImageIndex;
+    private int _currentFrameIndex;
+
+    private CommandPool _commandPool;
+    private CommandBuffer _commandBuffer;
+
+    private bool _disposed;
 
     public unsafe VulkanWindow(IWindow window, VulkanApplication application)
     {
@@ -41,16 +49,23 @@ internal sealed class VulkanWindow
 
         Debug.Assert(_khrSwapchain is not null);
 
+        CreateSyncObjects();
+        CreateCommandPool();
+        AllocateCommandBuffer();
+    }
+
+    private unsafe void CreateSyncObjects()
+    {
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
-            SemaphoreCreateInfo semaphoneCreateInfo = new()
+            SemaphoreCreateInfo semaphoreCreateInfo = new()
             {
                 SType = StructureType.SemaphoreCreateInfo,
                 Flags = SemaphoreCreateFlags.None,
             };
 
-            application.Vk.CreateSemaphore(application.Device, ref semaphoneCreateInfo, null, out _imageAvailableSemaphores[i]).EnsureSuccessed();
-            application.Vk.CreateSemaphore(application.Device, ref semaphoneCreateInfo, null, out _renderFinishedSemaphores[i]).EnsureSuccessed();
+            _application.Vk.CreateSemaphore(_application.Device, ref semaphoreCreateInfo, null, out _imageAvailableSemaphores[i]).EnsureSuccessed();
+            _application.Vk.CreateSemaphore(_application.Device, ref semaphoreCreateInfo, null, out _renderFinishedSemaphores[i]).EnsureSuccessed();
 
             FenceCreateInfo fenceCreateInfo = new()
             {
@@ -58,13 +73,54 @@ internal sealed class VulkanWindow
                 Flags = FenceCreateFlags.SignaledBit,
             };
 
-            application.Vk.CreateFence(application.Device, ref fenceCreateInfo, null, out _inFlightFences[i]).EnsureSuccessed();
+            _application.Vk.CreateFence(_application.Device, ref fenceCreateInfo, null, out _inFlightFences[i]).EnsureSuccessed();
         }
     }
+
+    private unsafe void CreateCommandPool()
+    {
+        CommandPoolCreateInfo poolInfo = new()
+        {
+            SType = StructureType.CommandPoolCreateInfo,
+            Flags = CommandPoolCreateFlags.ResetCommandBufferBit,
+            QueueFamilyIndex = _application.Indices.GraphicsFamily!.Value,
+        };
+
+        _application.Vk.CreateCommandPool(_application.Device, ref poolInfo, null, out _commandPool)
+            .EnsureSuccessed("failed to create command pool!");
+    }
+
+    private unsafe void AllocateCommandBuffer()
+    {
+        CommandBufferAllocateInfo allocInfo = new()
+        {
+            SType = StructureType.CommandBufferAllocateInfo,
+            CommandPool = _commandPool,
+            Level = CommandBufferLevel.Primary,
+            CommandBufferCount = 1,
+        };
+
+        fixed (CommandBuffer* pCommandBuffer = &_commandBuffer)
+        {
+            _application.Vk.AllocateCommandBuffers(_application.Device, ref allocInfo, pCommandBuffer)
+                .EnsureSuccessed("failed to allocate command buffer!");
+        }
+    }
+
     private unsafe void CleanupSwapChain()
     {
-        _khrSwapchain.DestroySwapchain(_application.Device, _swapchain, null);
+        _currentSurface?.Dispose();
+        _currentSurface = null;
+
+        _imageLayouts = null;
+
+        if (_swapchain.Handle is not 0)
+        {
+            _khrSwapchain.DestroySwapchain(_application.Device, _swapchain, null);
+            _swapchain = default;
+        }
     }
+
     public void RecreateSwapChain()
     {
         _application.Vk.DeviceWaitIdle(_application.Device);
@@ -74,30 +130,25 @@ internal sealed class VulkanWindow
         CreateSwapChain();
     }
 
-    [MemberNotNull(nameof(_khrSwapchain), nameof(_swapchain), nameof(_swapchainUsageFlags), nameof(_surfaces), nameof(_swapChainImages))]
+    [MemberNotNull(nameof(_swapchain), nameof(_swapchainUsageFlags), nameof(_imageLayouts), nameof(_swapChainImages))]
     public unsafe void CreateSwapChain()
     {
         Debug.Assert(_application.Indices.IsComplete is true);
 
         var swapChainSupport = _application.SwapChainSupport;
 
+        var surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.Formats);
+        var presentMode = ChooseSwapPresentMode(swapChainSupport.PresentModes);
         var extent = ChooseSwapExtent(swapChainSupport.Capabilities);
-        if ((extent.Width, extent.Height) == (_swapChainExtent.Width, _swapChainExtent.Height))
-        {
-            Debug.Assert(_khrSwapchain is not null);
-            Debug.Assert(_surfaces is not null);
-            Debug.Assert(_swapChainImages is not null);
-            return;
-        }
 
         _swapChainExtent = extent;
 
-        var surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.Formats);
-        var presentMode = ChooseSwapPresentMode(swapChainSupport.PresentModes);
-
-        var imageCount = uint.Clamp(swapChainSupport.Capabilities.MinImageCount + 1, swapChainSupport.Capabilities.MinImageCount, swapChainSupport.Capabilities.MaxImageCount);
-
-        var queueFamilyIndex = _application.Indices.GraphicsFamily.Value;
+        var imageCount = uint.Clamp(
+            swapChainSupport.Capabilities.MinImageCount + 1,
+            swapChainSupport.Capabilities.MinImageCount,
+            swapChainSupport.Capabilities.MaxImageCount > 0
+                ? swapChainSupport.Capabilities.MaxImageCount
+                : uint.MaxValue);
 
         _swapchainUsageFlags = ImageUsageFlags.ColorAttachmentBit
             | ImageUsageFlags.TransferSrcBit
@@ -115,10 +166,8 @@ internal sealed class VulkanWindow
             ImageArrayLayers = 1,
             ImageUsage = _swapchainUsageFlags,
             ImageSharingMode = SharingMode.Exclusive,
-            QueueFamilyIndexCount = 1,
-            PQueueFamilyIndices = &queueFamilyIndex,
-            PreTransform = SurfaceTransformFlagsKHR.IdentityBitKhr,
-            CompositeAlpha = CompositeAlphaFlagsKHR.InheritBitKhr,
+            PreTransform = swapChainSupport.Capabilities.CurrentTransform,
+            CompositeAlpha = CompositeAlphaFlagsKHR.OpaqueBitKhr,
             PresentMode = presentMode,
             Clipped = true,
             OldSwapchain = default,
@@ -133,25 +182,20 @@ internal sealed class VulkanWindow
                 createInfo.QueueFamilyIndexCount = 2;
                 createInfo.PQueueFamilyIndices = ptr;
             }
-            else
-            {
-                createInfo.ImageSharingMode = SharingMode.Exclusive;
-                createInfo.QueueFamilyIndexCount = 0; // Optional
-                createInfo.PQueueFamilyIndices = null; // Optional
-            }
 
-            createInfo.PreTransform = swapChainSupport.Capabilities.CurrentTransform;
-            createInfo.CompositeAlpha = CompositeAlphaFlagsKHR.OpaqueBitKhr;
-            createInfo.PresentMode = presentMode;
-            createInfo.Clipped = true;
-            createInfo.OldSwapchain = default;
-
-            _khrSwapchain.CreateSwapchain(_application.Device, ref createInfo, null, out _swapchain).EnsureSuccessed("failed to create swap chain!");
+            _khrSwapchain.CreateSwapchain(_application.Device, ref createInfo, null, out _swapchain)
+                .EnsureSuccessed("failed to create swap chain!");
         }
 
-        _swapChainImages = Utils.TwoStep<Image>((ref r, ref c) => _khrSwapchain.GetSwapchainImages(_application.Device, _swapchain, ref c, out r).EnsureSuccessed());
-        _surfaces = new SKSurface[_swapChainImages.Length];
+        _swapChainImages = Utils.TwoStep<Image>((ref r, ref c) =>
+            _khrSwapchain.GetSwapchainImages(_application.Device, _swapchain, ref c, out r).EnsureSuccessed());
 
+        _currentSurface?.Dispose();
+        _currentSurface = null;
+
+        _imageLayouts = new ImageLayout[_swapChainImages.Length];
+        // All swapchain images start in Undefined layout
+        Array.Fill(_imageLayouts, ImageLayout.Undefined);
         _swapChainImageFormat = surfaceFormat.Format;
     }
 
@@ -188,59 +232,301 @@ internal sealed class VulkanWindow
         return availableFormats.First();
     }
 
-    public SKSurface GetCurrent(ulong currentFrame)
+    public unsafe SKSurface GetCurrent(ulong currentFrame)
     {
         Debug.Assert(_khrSwapchain is not null);
         Debug.Assert(_swapChainImages is not null);
+        Debug.Assert(_imageLayouts is not null);
         Debug.Assert(!_application.GRContext.IsAbandoned);
         Debug.Assert(_application.Indices.IsComplete);
 
-        var frame = currentFrame % MAX_FRAMES_IN_FLIGHT;
+        var frame = (int)(currentFrame % MAX_FRAMES_IN_FLIGHT);
 
-        _application.Vk.WaitForFences(_application.Device, 1, ref _inFlightFences[frame], true, ulong.MaxValue).EnsureSuccessed();
+        // 1. Wait for the previous frame's GPU work to complete
+        _application.Vk.WaitForFences(_application.Device, 1, ref _inFlightFences[frame], true, ulong.MaxValue)
+            .EnsureSuccessed();
 
-        _application.Vk.ResetFences(_application.Device, 1, ref _inFlightFences[frame]).EnsureSuccessed();
+        _application.Vk.ResetFences(_application.Device, 1, ref _inFlightFences[frame])
+            .EnsureSuccessed();
 
+        // 2. Acquire the next swapchain image
         uint imageIndex = 0;
-        _khrSwapchain.AcquireNextImage(
+        var acquireResult = _khrSwapchain.AcquireNextImage(
             _application.Device,
             _swapchain,
             ulong.MaxValue,
             _imageAvailableSemaphores[frame],
             default,
-            ref imageIndex)
-            .EnsureSuccessed();
+            ref imageIndex);
 
+        if (acquireResult is Result.ErrorOutOfDateKhr)
+        {
+            RecreateSwapChain();
+            // Retry once after recreation
+            acquireResult = _khrSwapchain.AcquireNextImage(
+                _application.Device,
+                _swapchain,
+                ulong.MaxValue,
+                _imageAvailableSemaphores[frame],
+                default,
+                ref imageIndex);
+        }
+
+        // VK_SUBOPTIMAL_KHR is still usable — just log and continue
+        if (acquireResult is not Result.Success and not Result.SuboptimalKhr)
+            acquireResult.EnsureSuccessed();
+
+        _currentImageIndex = imageIndex;
+        _currentFrameIndex = frame;
         var image = _swapChainImages[imageIndex];
 
         Debug.Assert(image.Handle is not 0);
+
+        // 3. Transition image layout to ColorAttachmentOptimal for Skia rendering.
+        //    Uses per-image layout tracking: first use is Undefined → ColorAttachmentOptimal,
+        //    subsequent uses are PresentSrcKHR → ColorAttachmentOptimal.
+        var oldLayout = _imageLayouts[imageIndex];
+        RecordLayoutTransition(image, oldLayout, ImageLayout.ColorAttachmentOptimal);
+        _imageLayouts[imageIndex] = ImageLayout.ColorAttachmentOptimal;
+
+        var cmdBuffer = _commandBuffer;
+        var waitSemaphore = _imageAvailableSemaphores[frame];
+        PipelineStageFlags waitStage = PipelineStageFlags.ColorAttachmentOutputBit;
+        SubmitInfo submitInfo = new()
+        {
+            SType = StructureType.SubmitInfo,
+            WaitSemaphoreCount = 1,
+            PWaitSemaphores = &waitSemaphore,
+            PWaitDstStageMask = &waitStage,
+            CommandBufferCount = 1,
+            PCommandBuffers = &cmdBuffer,
+        };
+        _application.Vk.QueueSubmit(_application.GraphicsQueue, 1, ref submitInfo, default)
+            .EnsureSuccessed();
+
+        // 4. Dispose old surface (from previous frame) and create a fresh one.
+        //    Creating a new GRBackendRenderTarget + SKSurface each frame ensures
+        //    Skia's internal layout tracking matches reality — the surface's
+        //    ImageLayout reflects the actual layout right now (ColorAttachmentOptimal).
+        _currentSurface?.Dispose();
 
         GRVkAlloc alloc = new();
         GRVkImageInfo imageInfo = new()
         {
             Image = image.Handle,
             ImageTiling = (uint)ImageTiling.Optimal,
-            ImageLayout = (uint)ImageLayout.Undefined,
+            ImageLayout = (uint)ImageLayout.ColorAttachmentOptimal,
             Format = (uint)_swapChainImageFormat,
             ImageUsageFlags = (uint)_swapchainUsageFlags,
             SampleCount = 1,
             LevelCount = 1,
-            CurrentQueueFamily = _application.Indices.GraphicsFamily.Value,
+            CurrentQueueFamily = _application.Indices.GraphicsFamily!.Value,
             SharingMode = (uint)(_application.Indices.GraphicsFamily != _application.Indices.PresentFamily
                 ? SharingMode.Concurrent
                 : SharingMode.Exclusive),
             Alloc = alloc,
         };
 
-        GRBackendRenderTarget backendRenderTarget = new((int)_swapChainExtent.Width, (int)_swapChainExtent.Height, imageInfo);
+        GRBackendRenderTarget backendRenderTarget = new(
+            (int)_swapChainExtent.Width, (int)_swapChainExtent.Height, imageInfo);
         Debug.Assert(backendRenderTarget.IsValid);
 
-        var surface = SKSurface.Create(_application.GRContext, backendRenderTarget, GRSurfaceOrigin.TopLeft, SKColorType.Bgra8888);
+        _currentSurface = SKSurface.Create(
+            _application.GRContext,
+            backendRenderTarget,
+            GRSurfaceOrigin.TopLeft,
+            SKColorType.Bgra8888);
 
+        Debug.Assert(_currentSurface is not null);
         Debug.Assert(!_application.GRContext.IsAbandoned);
-        Debug.Assert(surface is not null);
 
-        return surface;
+        return _currentSurface;
+    }
+
+    /// <summary>
+    /// Complete the frame: flush Skia GPU commands, transition layout back to
+    /// PresentSrcKHR, signal fence + renderFinished semaphore, and present.
+    /// No CPU-side GPU wait — pipeline depth is controlled by
+    /// <see cref="GetCurrent"/> waiting on fences from <c>MAX_FRAMES_IN_FLIGHT</c> ago.
+    /// </summary>
+    public unsafe void End()
+    {
+        Debug.Assert(_swapChainImages is not null);
+        Debug.Assert(_imageLayouts is not null);
+
+        // 1. Flush all pending Skia GPU work (submits to graphics queue)
+        _application.GRContext.Flush();
+
+        // 2. Record layout transition into command buffer (does NOT submit yet)
+        var frame = _currentFrameIndex;
+        var imageIndex = _currentImageIndex;
+        RecordLayoutTransition(
+            _swapChainImages[imageIndex],
+            ImageLayout.ColorAttachmentOptimal,
+            ImageLayout.PresentSrcKhr);
+
+        // 3. Submit layout transition, signal fence + renderFinished semaphore.
+        //    GPU queue order: [Skia rendering] → [layout transition] → fence + semaphore
+        var commandBuffer = _commandBuffer;
+        var fence = _inFlightFences[frame];
+        var signalSemaphore = _renderFinishedSemaphores[frame];
+        SubmitInfo submitInfo = new()
+        {
+            SType = StructureType.SubmitInfo,
+            CommandBufferCount = 1,
+            PCommandBuffers = &commandBuffer,
+            SignalSemaphoreCount = 1,
+            PSignalSemaphores = &signalSemaphore,
+        };
+        _application.Vk.QueueSubmit(_application.GraphicsQueue, 1, ref submitInfo, fence)
+            .EnsureSuccessed();
+
+        // 4. Track layout has changed to PresentSrcKHR
+        _imageLayouts[imageIndex] = ImageLayout.PresentSrcKhr;
+
+        // 5. Present — presentation engine GPU-waits on renderFinished semaphore,
+        //    no CPU-side wait needed here.
+        var swapchain = _swapchain;
+        PresentInfoKHR presentInfo = new()
+        {
+            SType = StructureType.PresentInfoKhr,
+            WaitSemaphoreCount = 1,
+            PWaitSemaphores = &signalSemaphore,
+            SwapchainCount = 1,
+            PSwapchains = &swapchain,
+            PImageIndices = &imageIndex,
+        };
+
+        _khrSwapchain!.QueuePresent(_application.PresentQueue, ref presentInfo)
+            .EnsureSuccessed();
+    }
+
+    /// <summary>
+    /// Record a pipeline barrier into <see cref="_commandBuffer"/> to transition
+    /// an image between two layouts. Does NOT submit — caller must submit.
+    /// </summary>
+    private unsafe void RecordLayoutTransition(Image image, ImageLayout oldLayout, ImageLayout newLayout)
+    {
+        _application.Vk.ResetCommandBuffer(_commandBuffer, CommandBufferResetFlags.None);
+
+        CommandBufferBeginInfo beginInfo = new()
+        {
+            SType = StructureType.CommandBufferBeginInfo,
+            Flags = CommandBufferUsageFlags.OneTimeSubmitBit,
+        };
+
+        _application.Vk.BeginCommandBuffer(_commandBuffer, ref beginInfo);
+
+        ImageMemoryBarrier barrier = new()
+        {
+            SType = StructureType.ImageMemoryBarrier,
+            OldLayout = oldLayout,
+            NewLayout = newLayout,
+            SrcQueueFamilyIndex = Vk.QueueFamilyIgnored,
+            DstQueueFamilyIndex = Vk.QueueFamilyIgnored,
+            Image = image,
+            SubresourceRange = new ImageSubresourceRange
+            {
+                AspectMask = ImageAspectFlags.ColorBit,
+                BaseMipLevel = 0,
+                LevelCount = 1,
+                BaseArrayLayer = 0,
+                LayerCount = 1,
+            },
+        };
+
+        PipelineStageFlags sourceStage;
+        PipelineStageFlags destinationStage;
+
+        if (oldLayout == ImageLayout.Undefined && newLayout == ImageLayout.ColorAttachmentOptimal)
+        {
+            barrier.SrcAccessMask = 0;
+            barrier.DstAccessMask = AccessFlags.ColorAttachmentWriteBit;
+            sourceStage = PipelineStageFlags.TopOfPipeBit;
+            destinationStage = PipelineStageFlags.ColorAttachmentOutputBit;
+        }
+        else if (oldLayout == ImageLayout.PresentSrcKhr && newLayout == ImageLayout.ColorAttachmentOptimal)
+        {
+            barrier.SrcAccessMask = AccessFlags.MemoryReadBit;
+            barrier.DstAccessMask = AccessFlags.ColorAttachmentWriteBit;
+            sourceStage = PipelineStageFlags.BottomOfPipeBit;
+            destinationStage = PipelineStageFlags.ColorAttachmentOutputBit;
+        }
+        else if (oldLayout == ImageLayout.ColorAttachmentOptimal && newLayout == ImageLayout.PresentSrcKhr)
+        {
+            barrier.SrcAccessMask = AccessFlags.ColorAttachmentWriteBit;
+            barrier.DstAccessMask = 0;
+            sourceStage = PipelineStageFlags.ColorAttachmentOutputBit;
+            destinationStage = PipelineStageFlags.BottomOfPipeBit;
+        }
+        else
+        {
+            throw new InvalidOperationException(
+                $"Unsupported layout transition: {oldLayout} → {newLayout}");
+        }
+
+        _application.Vk.CmdPipelineBarrier(
+            _commandBuffer,
+            sourceStage,
+            destinationStage,
+            DependencyFlags.None,
+            0, null,
+            0, null,
+            1, ref barrier);
+
+        _application.Vk.EndCommandBuffer(_commandBuffer);
+    }
+
+    public unsafe void Destroy()
+    {
+        DisposeCore();
+    }
+
+    private unsafe void DisposeCore()
+    {
+        if (_disposed)
+            return;
+
+        _disposed = true;
+
+        _application.Vk.DeviceWaitIdle(_application.Device);
+
+        CleanupSwapChain();
+
+        // Destroy command buffer and pool
+        if (_commandBuffer.Handle is not 0)
+        {
+            _application.Vk.FreeCommandBuffers(_application.Device, _commandPool, 1, ref _commandBuffer);
+        }
+
+        if (_commandPool.Handle is not 0)
+        {
+            _application.Vk.DestroyCommandPool(_application.Device, _commandPool, null);
+        }
+
+        // Destroy sync objects
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        {
+            if (_renderFinishedSemaphores[i].Handle is not 0)
+                _application.Vk.DestroySemaphore(_application.Device, _renderFinishedSemaphores[i], null);
+
+            if (_imageAvailableSemaphores[i].Handle is not 0)
+                _application.Vk.DestroySemaphore(_application.Device, _imageAvailableSemaphores[i], null);
+
+            if (_inFlightFences[i].Handle is not 0)
+                _application.Vk.DestroyFence(_application.Device, _inFlightFences[i], null);
+        }
+    }
+
+    public void Dispose()
+    {
+        DisposeCore();
+        GC.SuppressFinalize(this);
+    }
+
+    ~VulkanWindow()
+    {
+        DisposeCore();
     }
 
 }

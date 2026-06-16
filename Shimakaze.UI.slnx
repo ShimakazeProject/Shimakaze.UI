@@ -6,6 +6,20 @@
     <Project Path="example/CursorInstaller/CursorInstaller.csproj" />
     <Project Path="example/Example/Example.csproj" />
   </Folder>
+  <Folder Name="/lib/">
+    <Project Path="lib/Shimakaze.Foundation/src/Shimakaze.Foundation.Input.Cursors/Shimakaze.Foundation.Input.Cursors.csproj" />
+    <Project Path="lib/Shimakaze.Foundation/src/Shimakaze.Foundation.Input.IME.Windows.IMM/Shimakaze.Foundation.Input.IME.Windows.IMM.csproj" />
+    <Project Path="lib/Shimakaze.Foundation/src/Shimakaze.Foundation.Input.IME/Shimakaze.Foundation.Input.IME.csproj" />
+    <Project Path="lib/Shimakaze.Foundation/src/Shimakaze.Foundation.Rendering/Shimakaze.Foundation.Rendering.csproj" />
+    <Project Path="lib/Shimakaze.Foundation/src/Shimakaze.Foundation.Runtime.Threading/Shimakaze.Foundation.Runtime.Threading.csproj" />
+    <Project Path="lib/Shimakaze.Foundation/src/Shimakaze.Foundation.Runtime/Shimakaze.Foundation.Runtime.csproj" />
+    <Project Path="lib/Shimakaze.Foundation/src/Shimakaze.Foundation.Windowing.GLFW/Shimakaze.Foundation.Windowing.GLFW.csproj" />
+    <Project Path="lib/Shimakaze.Foundation/src/Shimakaze.Foundation.Windowing.Rendering.OpenGL/Shimakaze.Foundation.Windowing.Rendering.OpenGL.csproj" />
+    <Project Path="lib/Shimakaze.Foundation/src/Shimakaze.Foundation.Windowing.Rendering.Vulkan/Shimakaze.Foundation.Windowing.Rendering.Vulkan.csproj" />
+    <Project Path="lib/Shimakaze.Foundation/src/Shimakaze.Foundation.Windowing.Rendering/Shimakaze.Foundation.Windowing.Rendering.csproj" />
+    <Project Path="lib/Shimakaze.Foundation/src/Shimakaze.Foundation.Windowing.SDL/Shimakaze.Foundation.Windowing.SDL.csproj" />
+    <Project Path="lib/Shimakaze.Foundation/src/Shimakaze.Foundation.Windowing/Shimakaze.Foundation.Windowing.csproj" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".gitattributes" />
@@ -18,12 +32,7 @@
   </Folder>
   <Project Path="src/Shimakaze.UI.Binding/Shimakaze.UI.Binding.csproj" />
   <Project Path="src/Shimakaze.UI.Controls/Shimakaze.UI.Controls.csproj" />
-  <Project Path="src/Shimakaze.UI.Core/Shimakaze.UI.Core.csproj" />
   <Project Path="src/Shimakaze.UI.Fonts/Shimakaze.UI.Fonts.csproj" />
-  <Project Path="src/Shimakaze.UI.Glfw/Shimakaze.UI.Glfw.csproj" />
-  <Project Path="src/Shimakaze.UI.Input/Shimakaze.UI.Input.csproj" />
   <Project Path="src/Shimakaze.UI.Media/Shimakaze.UI.Media.csproj" />
   <Project Path="src/Shimakaze.UI.MVVM/Shimakaze.UI.MVVM.csproj" />
-  <Project Path="src/Shimakaze.UI.Rendering.OpenGL/Shimakaze.UI.Rendering.OpenGL.csproj" />
-  <Project Path="src/Shimakaze.UI.Rendering/Shimakaze.UI.Rendering.csproj" />
 </Solution>

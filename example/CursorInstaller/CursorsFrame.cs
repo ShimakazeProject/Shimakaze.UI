@@ -1,4 +1,4 @@
-using Shimakaze.UI.Rendering;
+﻿using Shimakaze.Foundation.Rendering;
 
 using SkiaSharp;
 

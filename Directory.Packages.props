@@ -5,15 +5,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.269" />
     <PackageVersion Include="Polyfill" Version="9.18.0" />
     <PackageVersion Include="Silk.NET.Core" Version="2.23.0" />
-    <PackageVersion Include="Silk.NET.Input.Common" Version="2.23.0" />
-    <PackageVersion Include="Silk.NET.Input.Glfw" Version="2.23.0" />
-    <PackageVersion Include="Silk.NET.OpenGL" Version="2.23.0" />
-    <PackageVersion Include="Silk.NET.Windowing.Common" Version="2.23.0" />
-    <PackageVersion Include="Silk.NET.Windowing.Glfw" Version="2.23.0" />
     <PackageVersion Include="SkiaSharp" Version="3.119.2" />
     <PackageVersion Include="SkiaSharp.HarfBuzz" Version="3.119.2" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.2" />

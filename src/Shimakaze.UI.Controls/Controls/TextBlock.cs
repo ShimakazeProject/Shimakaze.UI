@@ -1,5 +1,5 @@
+﻿using Shimakaze.Foundation.Rendering;
 using Shimakaze.UI.Fonts;
-using Shimakaze.UI.Rendering;
 
 namespace Shimakaze.UI.Controls;
 

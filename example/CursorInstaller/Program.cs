@@ -1,11 +1,23 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
-var builder = Host.CreateShimakazeUIApplicationBuilder(args);
-builder.Services.UseGlfw();
-builder.Services.UseOpenGL();
-builder.Services.AddPlatformWindow<MainWindow>();
+using Shimakaze.Foundation.Runtime;
+using Shimakaze.Foundation.Windowing;
+using Shimakaze.Foundation.Windowing.GLFW;
+using Shimakaze.Foundation.Windowing.Rendering;
+using Shimakaze.Foundation.Windowing.Rendering.OpenGL;
+using Shimakaze.Foundation.Windowing.Rendering.Vulkan;
+using Shimakaze.Foundation.Windowing.SDL;
 
-var app = builder.Build();
+var builder = ApplicationBuilder.Create();
+
+builder.Services.AddPlatformWindowFactory<GlfwPlatformWindowFactory>();
+//builder.Services.AddPlatformWindowFactory<SdlPlatformWindowFactory>();
+
+builder.Services.AddPlatformWindowRendererProvider<OpenGLPlatformWindowRendererProvider>();
+//builder.Services.AddPlatformWindowRendererProvider<VulkanPlatformWindowRendererProvider>();
+
+builder.Services.AddSingleton<PlatformWindow, MainWindow>();
+
+Application app = builder.Build();
 
 await app.RunAsync();

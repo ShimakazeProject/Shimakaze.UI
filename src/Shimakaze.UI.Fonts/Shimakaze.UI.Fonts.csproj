@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shimakaze.UI.Rendering\Shimakaze.UI.Rendering.csproj" />
+    <ProjectReference Include="..\..\lib\Shimakaze.Foundation\src\Shimakaze.Foundation.Windowing.Rendering\Shimakaze.Foundation.Windowing.Rendering.csproj" />
   </ItemGroup>
 
 </Project>

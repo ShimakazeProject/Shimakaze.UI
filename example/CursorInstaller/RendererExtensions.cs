@@ -1,8 +1,8 @@
-using System.Drawing;
+﻿using System.Drawing;
 
+using Shimakaze.Foundation.Rendering;
 using Shimakaze.UI;
 using Shimakaze.UI.Fonts;
-using Shimakaze.UI.Rendering;
 
 using SkiaSharp;
 using SkiaSharp.HarfBuzz;

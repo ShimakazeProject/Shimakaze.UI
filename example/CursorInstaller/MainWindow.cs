@@ -1,18 +1,18 @@
-using System.Drawing;
+﻿using System.Drawing;
 
+using Shimakaze.Foundation.Rendering;
+using Shimakaze.Foundation.Rendering.Extensions;
+using Shimakaze.Foundation.Windowing;
+using Shimakaze.Foundation.Windowing.Events;
+using Shimakaze.Foundation.Windowing.Rendering;
 using Shimakaze.UI;
-using Shimakaze.UI.Core;
 using Shimakaze.UI.Fonts;
-using Shimakaze.UI.Input;
-using Shimakaze.UI.Input.EventArgs;
-using Shimakaze.UI.Rendering;
-using Shimakaze.UI.Rendering.Extensions;
 
 using Silk.NET.Input;
 
 using SkiaSharp;
 
-sealed class MainWindow : PlatformWindow
+sealed class MainWindow(PlatformWindowRendererProvider rendererProvider) : PlatformWindow
 {
 
     private const float DAMPING = 8.0f;  // 阻尼系数（单位：1/秒），典型值 6~12
@@ -50,16 +50,18 @@ sealed class MainWindow : PlatformWindow
         _descentLeft = FontManager.GetFont(_fontLeftSide).Metrics.Descent;
         _descentRight = FontManager.GetFont(_fontRightSide).Metrics.Descent;
 
-        var size = Native.Size;
+        var native = DangerousGetNative();
+
+        var size = native.Size;
         size.X = 720;
-        Native.Size = size;
+        native.Size = size;
 
         var height = Size.Height - StartY;
         var count = height / _cursorWidth + 1;
 
-        this.Input.MouseScroll += Scroll;
-        this.Input.MouseClick += Click;
-        this.Input.KeyboardKeyPressed += KeyPressed;
+        MouseScroll += Scroll;
+        MouseClick += Click;
+        KeyboardKeyPressed += KeyPressed;
 
         await Task.Run(async () =>
         {
@@ -76,7 +78,7 @@ sealed class MainWindow : PlatformWindow
         }).ConfigureAwait(false);
     }
 
-    private void KeyPressed(InputManager sender, KeyboardKeyPressedEventArgs eventArgs)
+    private void KeyPressed(PlatformWindow sender, KeyboardKeyPressedEventArgs eventArgs)
     {
         switch (eventArgs.Key)
         {
@@ -98,7 +100,7 @@ sealed class MainWindow : PlatformWindow
         Focus();
     }
 
-    private void Click(InputManager sender, MouseClickEventArgs eventArgs)
+    private void Click(PlatformWindow sender, MouseClickEventArgs eventArgs)
     {
         if (eventArgs.Button is not MouseButton.Left)
             return;
@@ -130,7 +132,7 @@ sealed class MainWindow : PlatformWindow
         }
     }
 
-    private void Scroll(InputManager sender, MouseScrollEventArgs eventArgs)
+    private void Scroll(PlatformWindow sender, MouseScrollEventArgs eventArgs)
     {
         _targetY += eventArgs.Wheel.Y * _cursorHeight;
         _targetY = float.Clamp(_targetY, -(_cursors.Count - 1) * _cursorHeight, 0);
@@ -176,7 +178,7 @@ sealed class MainWindow : PlatformWindow
     {
         base.OnRender(time);
 
-        using var renderer = Application.GetRenderer(this);
+        using var renderer = rendererProvider.GetRenderer(this);
 
         renderer.Clear(Color.Black);
 
@@ -231,7 +233,7 @@ sealed class MainWindow : PlatformWindow
         }
     }
 
-    private void PrintHeader(BaseRenderer renderer)
+    private void PrintHeader(Renderer renderer)
     {
         using var rotatedRenderer = renderer.RotateDegrees(Degrees);
 

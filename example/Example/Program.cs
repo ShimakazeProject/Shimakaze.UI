@@ -1,32 +1,43 @@
 ﻿using System.Drawing;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
+using Shimakaze.Foundation.Rendering;
+using Shimakaze.Foundation.Rendering.Extensions;
+using Shimakaze.Foundation.Runtime;
+using Shimakaze.Foundation.Windowing;
+using Shimakaze.Foundation.Windowing.GLFW;
+using Shimakaze.Foundation.Windowing.Rendering;
+using Shimakaze.Foundation.Windowing.Rendering.OpenGL;
+using Shimakaze.Foundation.Windowing.Rendering.Vulkan;
+using Shimakaze.Foundation.Windowing.SDL;
 using Shimakaze.UI;
 using Shimakaze.UI.Controls;
-using Shimakaze.UI.Core;
 using Shimakaze.UI.Fonts;
 using Shimakaze.UI.Media;
-using Shimakaze.UI.Rendering;
-using Shimakaze.UI.Rendering.Extensions;
 
 using SkiaSharp;
 
-var builder = Host.CreateShimakazeUIApplicationBuilder(args);
-builder.Services.UseGlfw();
-builder.Services.UseOpenGL();
-builder.Services.AddWindow<MainWindow>();
+var builder = ApplicationBuilder.Create();
 
-var app = builder.Build();
+builder.Services.AddPlatformWindowFactory<GlfwPlatformWindowFactory>();
+//builder.Services.AddPlatformWindowFactory<SdlPlatformWindowFactory>();
+
+builder.Services.AddPlatformWindowRendererProvider<OpenGLPlatformWindowRendererProvider>();
+//builder.Services.AddPlatformWindowRendererProvider<VulkanPlatformWindowRendererProvider>();
+
+builder.Services.AddSingleton<MainWindow>();
+builder.Services.AddSingleton<PlatformWindow>(provider => provider.GetRequiredService<MainWindow>().PlatformWindow);
+
+Application app = builder.Build();
 
 await app.RunAsync();
 
 sealed class MainWindow : Window
 {
-    public MainWindow()
+    public MainWindow(PlatformWindowRendererProvider rendererProvider) : base(rendererProvider)
     {
-        using var fs = File.OpenRead(@"");
+        using var fs = File.OpenRead(@"D:\Shimakaze\Desktop\85402558_p18_ex.png");
         var image = SKImage.FromEncodedData(fs);
         Content = new ChildrenElement()
         {
@@ -39,8 +50,8 @@ sealed class MainWindow : Window
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                     ImageSource = new SkiaImageSource(image),
-                    Width = 256,
-                    Height = 384,
+                    Width = 1052 / 3,
+                    Height = 1494 / 3,
                 },
                 new TextBlock()
                 {
@@ -55,9 +66,7 @@ sealed class MainWindow : Window
     protected override void OnInitialize()
     {
         base.OnInitialize();
-        IPlatformWindowWrap wrap = this;
-        PlatformWindow platformWindow = wrap.PlatformWindow;
-        Console.WriteLine(platformWindow.Native.Native?.Kind);
+        Console.WriteLine(PlatformWindow.DangerousGetNative().Native?.Kind);
     }
 }
 

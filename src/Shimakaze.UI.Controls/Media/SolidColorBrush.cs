@@ -1,7 +1,7 @@
-using System.Drawing;
+﻿using System.Drawing;
 
-using Shimakaze.UI.Rendering;
-using Shimakaze.UI.Rendering.Extensions;
+using Shimakaze.Foundation.Rendering;
+using Shimakaze.Foundation.Rendering.Extensions;
 
 using SkiaSharp;
 

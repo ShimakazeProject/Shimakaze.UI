@@ -1,6 +1,6 @@
-using System.Drawing;
+﻿using System.Drawing;
 
-using Shimakaze.UI.Rendering;
+using Shimakaze.Foundation.Rendering;
 
 namespace Shimakaze.UI.Controls;
 

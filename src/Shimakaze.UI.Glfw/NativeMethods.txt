@@ -1,7 +1,0 @@
-DwmSetWindowAttribute
-GetWindowThreadProcessId
-SetWindowsHookEx
-CallNextHookEx
-WM_SETTINGCHANGE
-DWM_SYSTEMBACKDROP_TYPE
-CWPSTRUCT

@@ -1,6 +1,6 @@
-using System.Drawing;
+﻿using System.Drawing;
 
-using Shimakaze.UI.Rendering.Extensions;
+using Shimakaze.Foundation.Rendering.Extensions;
 
 using SkiaSharp;
 using SkiaSharp.HarfBuzz;
@@ -87,7 +87,7 @@ public static class FontManager
 
     public static RectangleF Measure(string text, Font? font = null)
     {
-        var skfont = FontManager.GetFont(font);
+        var skfont = GetFont(font);
         skfont.MeasureText(text, out var bounds);
         return bounds.ToDrawing();
     }

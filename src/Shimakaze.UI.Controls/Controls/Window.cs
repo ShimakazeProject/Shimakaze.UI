@@ -1,28 +1,30 @@
-
+﻿
 using System.Drawing;
 
-using Shimakaze.UI.Core;
-using Shimakaze.UI.Input;
-using Shimakaze.UI.Input.EventArgs;
-using Shimakaze.UI.Rendering.Extensions;
+using Shimakaze.Foundation.Rendering.Extensions;
+using Shimakaze.Foundation.Windowing;
+using Shimakaze.Foundation.Windowing.Events;
+using Shimakaze.Foundation.Windowing.Rendering;
 
 namespace Shimakaze.UI.Controls;
 
-public class Window : ContentElement, IPlatformWindowWrap, IDisposable
+public class Window : ContentElement,  IDisposable
 {
-    private readonly PlatformWindow _window = new();
+    public readonly PlatformWindow PlatformWindow = new();
+    private readonly PlatformWindowRendererProvider _rendererProvider;
     private bool _disposedValue;
 
-    public Window()
+    public Window(PlatformWindowRendererProvider rendererProvider)
     {
-        _window.Initialize += OnInitialize;
-        _window.Update += OnUpdate;
-        _window.Render += OnRender;
-        _window.Resize += OnResize;
-        _window.Input.MouseClick += Input_MouseClick;
+        _rendererProvider = rendererProvider;
+        PlatformWindow.Initialize += OnInitialize;
+        PlatformWindow.Update += OnUpdate;
+        PlatformWindow.Render += OnRender;
+        PlatformWindow.Resize += OnResize;
+        PlatformWindow.MouseClick += Input_MouseClick;
     }
 
-    private void Input_MouseClick(InputManager sender, MouseClickEventArgs eventArgs)
+    private void Input_MouseClick(PlatformWindow sender, MouseClickEventArgs eventArgs)
     {
         if (Content is null)
             return;
@@ -40,7 +42,7 @@ public class Window : ContentElement, IPlatformWindowWrap, IDisposable
 
     private void OnRender(PlatformWindow sender, UpdateEventArgs eventArgs)
     {
-        using var renderer = Application.GetRenderer(_window);
+        using var renderer = _rendererProvider.GetRenderer(PlatformWindow);
         OnRender(renderer, eventArgs.DeltaTime);
     }
 
@@ -71,12 +73,10 @@ public class Window : ContentElement, IPlatformWindowWrap, IDisposable
 
     protected virtual void OnInitialize(PlatformWindow sender, EventArgs eventArgs)
     {
-        Width = _window.Size.Width;
-        Height = _window.Size.Height;
+        Width = PlatformWindow.Size.Width;
+        Height = PlatformWindow.Size.Height;
         OnInitialize();
     }
-
-    PlatformWindow IPlatformWindowWrap.PlatformWindow => _window;
 
     protected virtual void Dispose(bool disposing)
     {
@@ -84,7 +84,7 @@ public class Window : ContentElement, IPlatformWindowWrap, IDisposable
         {
             if (disposing)
             {
-                _window.Dispose();
+                PlatformWindow.Dispose();
             }
 
             _disposedValue = true;

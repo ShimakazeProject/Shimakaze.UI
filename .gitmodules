@@ -1,0 +1,3 @@
+[submodule "Shimakaze.Foundation"]
+	path = lib/Shimakaze.Foundation
+	url = git@github.com:ShimakazeProject/Shimakaze.Foundation.git
